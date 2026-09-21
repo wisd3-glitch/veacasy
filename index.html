@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sparkles by Annie — Menu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --ink:#1E2B22;
+    --paper:#EEF3EC;
+    --panel:#FAFBF7;
+    --accent:#B5651D;
+    --line:#CBD9CD;
+    --muted:#6E7C71;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px; margin:0 auto; padding:32px 20px 80px;}
+
+  header{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:8px;
+  }
+  .logo-slot{
+    flex:none;
+    width:56px; height:56px;
+    border-radius:12px;
+    background:var(--accent);
+    color:var(--panel);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-family:'Fraunces', serif;
+    font-size:22px;
+    overflow:hidden;
+  }
+  .logo-slot img{ width:100%; height:100%; object-fit:cover; }
+  .header-text{min-width:0;}
+  .eyebrow{
+    font-size:13px;
+    color:var(--muted);
+    margin:0 0 4px;
+  }
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:30px;
+    margin:0;
+    line-height:1.1;
+  }
+  .sub{
+    color:var(--muted);
+    font-size:15px;
+    margin:14px 0 0;
+    max-width:38ch;
+  }
+
+  .tabs{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    margin:28px 0 8px;
+    padding-bottom:4px;
+    scrollbar-width:none;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab{
+    flex:none;
+    border:none;
+    background:var(--panel);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-size:14px;
+    padding:8px 16px;
+    border-radius:999px;
+    cursor:pointer;
+  }
+  .tab.active{
+    background:var(--ink);
+    color:var(--paper);
+  }
+
+  .group-title{
+    font-family:'Fraunces', serif;
+    font-size:15px;
+    color:var(--accent);
+    margin:32px 0 4px;
+    padding-top:16px;
+    border-top:1px solid var(--line);
+  }
+  .group-title:first-of-type{border-top:none; padding-top:0;}
+
+  .item{
+    display:flex;
+    gap:16px;
+    padding:18px 0;
+    border-bottom:1px solid var(--line);
+    align-items:center;
+  }
+  .swatch{
+    flex:none;
+    width:64px; height:64px;
+    border-radius:6px;
+    background:var(--accent);
+    color:var(--panel);
+    font-family:'Fraunces', serif;
+    font-size:20px;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .swatch img{ width:100%; height:100%; object-fit:cover; }
+  .item.sold .swatch{filter:grayscale(1); opacity:.45;}
+  .item.sold .details{opacity:.45;}
+
+  .details{flex:1; min-width:0;}
+  .name{font-size:15.5px; font-weight:500; margin:0 0 3px; cursor:pointer;}
+  .name:hover{ text-decoration:underline; }
+  .price{font-size:14px; color:var(--accent); font-weight:600; margin:0;}
+
+  .order-btn{
+    flex:none;
+    background:var(--accent);
+    color:var(--panel);
+    border:none;
+    font-family:'Work Sans', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    padding:9px 16px;
+    border-radius:6px;
+    cursor:pointer;
+    text-decoration:none;
+  }
+  .sold-label{
+    flex:none;
+    font-size:13px;
+    color:var(--muted);
+    padding:9px 4px;
+  }
+
+  /* Product detail view */
+  .detail-header{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:18px;
+  }
+  .back-btn{
+    flex:none;
+    background:var(--panel);
+    border:none;
+    width:36px; height:36px;
+    border-radius:8px;
+    font-size:16px;
+    color:var(--ink);
+    cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .detail-header .name-crumb{
+    font-size:14px;
+    color:var(--muted);
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+  }
+  .detail-hero{
+    width:100%;
+    aspect-ratio:1/1;
+    max-height:340px;
+    border-radius:12px;
+    background:var(--accent);
+    color:var(--panel);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    font-size:48px;
+    overflow:hidden;
+    margin-bottom:18px;
+  }
+  .detail-hero img{ width:100%; height:100%; object-fit:cover; }
+  .detail-name{
+    font-family:'Fraunces', serif;
+    font-size:24px;
+    font-weight:600;
+    margin:0 0 6px;
+  }
+  .detail-meta-row{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:4px;
+  }
+  .detail-price{
+    font-size:19px;
+    font-weight:600;
+    color:var(--accent);
+  }
+  .stock-pill{
+    font-size:12px;
+    padding:3px 9px;
+    border-radius:999px;
+    background:var(--panel);
+    color:var(--muted);
+  }
+  .stock-pill.in{ color:var(--accent); }
+  .listed-date{
+    font-size:12.5px;
+    color:var(--muted);
+    margin:0 0 20px;
+  }
+  .desc-title{
+    font-family:'Fraunces', serif;
+    font-size:15px;
+    margin:0 0 8px;
+  }
+  .desc-box{
+    background:var(--panel);
+    border-radius:10px;
+    padding:14px;
+    font-size:14px;
+    line-height:1.5;
+    color:var(--ink);
+    margin-bottom:20px;
+  }
+  .desc-box.empty{ color:var(--muted); font-style:italic; }
+  .detail-order-btn{
+    display:block;
+    width:100%;
+    text-align:center;
+    background:var(--accent);
+    color:var(--panel);
+    border:none;
+    font-family:'Work Sans', sans-serif;
+    font-size:15px;
+    font-weight:500;
+    padding:13px 0;
+    border-radius:8px;
+    cursor:pointer;
+    text-decoration:none;
+    margin-bottom:26px;
+  }
+  .other-cats-title{
+    font-size:12.5px;
+    color:var(--muted);
+    margin:0 0 8px;
+  }
+  .related-grid{
+    display:flex;
+    gap:12px;
+    overflow-x:auto;
+    margin-bottom:26px;
+    padding-bottom:4px;
+  }
+  .related-card{
+    flex:none;
+    width:110px;
+    cursor:pointer;
+  }
+  .related-swatch{
+    width:110px; height:110px;
+    border-radius:10px;
+    background:var(--accent);
+    color:var(--panel);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'Fraunces', serif;
+    font-size:26px;
+    overflow:hidden;
+    margin-bottom:6px;
+  }
+  .related-swatch img{ width:100%; height:100%; object-fit:cover; }
+  .related-name{
+    font-size:12.5px;
+    margin:0 0 2px;
+    line-height:1.3;
+  }
+  .related-price{
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--accent);
+    margin:0;
+  }
+  .other-cats{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+
+  footer{
+    margin-top:40px;
+    font-size:12.5px;
+    color:var(--muted);
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo-slot" id="logoSlot"></div>
+    <div class="header-text">
+      <p class="eyebrow" id="taglineText"></p>
+      <h1 id="businessNameText"></h1>
+    </div>
+  </header>
+  <p class="sub">Tap anything to order on WhatsApp — no forms, no waiting.</p>
+
+  <div class="tabs" id="tabs"></div>
+  <div id="list"></div>
+
+  <footer>Menu updates instantly when stock or prices change.</footer>
+</div>
+
+<script>
+  // ─── SUPABASE CONNECTION ──────────────────────────────────────
+  // Paste your own project's values here — Supabase dashboard →
+  // Settings → API. Safe to leave visible in this file: the anon
+  // key only allows what the RLS policies permit (read-only here).
+  const SUPABASE_URL = "https://bfirghwabailetfuepyh.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_eKf6tIadS8Fq-wzSTl95hw_UcrELF5p";
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // No file is tied to one vendor anymore — this same page serves every
+  // store. The slug comes from whatever path it was actually loaded at,
+  // e.g. /sparkles-by-annie loads Annie's store, /some-other-seller loads theirs.
+  const VENDOR_SLUG = window.location.pathname.split("/").filter(Boolean)[0] || null;
+
+  let settings = {};
+  let items = [];
+  let categories = ["All"];
+  let active = "All";
+  let viewMode = "list"; // "list" | "detail"
+  let currentDetailItem = null;
+
+  async function loadStore(){
+    if (!VENDOR_SLUG){
+      document.getElementById("list").innerHTML =
+        `<p style="color:var(--muted); padding:40px 0; text-align:center;">No store specified — check the link you were given.</p>`;
+      throw new Error("No vendor slug in URL");
+    }
+
+    const { data: vendor, error: vendorErr } = await supabase
+      .from("vendors")
+      .select("*")
+      .eq("slug", VENDOR_SLUG)
+      .single();
+
+    if (vendorErr || !vendor){
+      document.getElementById("list").innerHTML =
+        `<p style="color:var(--muted); padding:40px 0; text-align:center;">This store couldn't be found.</p>`;
+      throw vendorErr || new Error("Vendor not found");
+    }
+
+    settings = {
+      businessName: vendor.business_name,
+      tagline: vendor.tagline,
+      whatsapp: vendor.whatsapp_number,
+      accent: vendor.accent_color || "#2F6B4A",
+      logoUrl: vendor.logo_url,
+    };
+
+    const { data: products, error: productsErr } = await supabase
+      .from("products")
+      .select("*")
+      .eq("vendor_id", vendor.id);
+
+    if (productsErr) throw productsErr;
+
+    items = (products || []).map(p => ({
+      id: p.id,
+      code: p.code,
+      name: p.name,
+      price: p.price,
+      category: p.category || "Uncategorized",
+      stock: p.in_stock,
+      description: p.description || "",
+      photoUrl: p.photo_url,
+      dateListed: p.created_at
+        ? new Date(p.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+        : "",
+    }));
+
+    categories = ["All", ...new Set(items.map(i => i.category))];
+  }
+
+  function money(n){ return "₦" + n.toLocaleString(); }
+
+  function hexToHsl(hex){
+    hex = hex.replace("#", "");
+    if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
+    const r = parseInt(hex.substr(0,2),16)/255, g = parseInt(hex.substr(2,2),16)/255, b = parseInt(hex.substr(4,2),16)/255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    let h, s, l = (max+min)/2;
+    if (max === min){ h = s = 0; }
+    else{
+      const d = max - min;
+      s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max){
+        case r: h = (g-b)/d + (g<b?6:0); break;
+        case g: h = (b-r)/d + 2; break;
+        default: h = (r-g)/d + 4;
+      }
+      h /= 6;
+    }
+    return { h: h*360, s: s*100, l: l*100 };
+  }
+
+  function hslToHex(h, s, l){
+    s/=100; l/=100;
+    const k = n => (n + h/30) % 12;
+    const a = s * Math.min(l, 1-l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n), 1)));
+    const toHex = x => Math.round(255*x).toString(16).padStart(2,"0");
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+  }
+
+  // Same theme logic as the dashboard: the vendor's one chosen color
+  // re-tints the whole page, not just the buttons.
+  function applyTheme(accentHex){
+    const { h, s, l } = hexToHsl(accentHex);
+    const isNeutral = s < 4;
+    const maxAccentLightness = 55;
+    const safeL = Math.min(l, maxAccentLightness);
+    const safeAccentHex = hslToHex(h, s, safeL);
+    const bgS = tone => isNeutral ? 0 : tone;
+
+    const root = document.documentElement.style;
+    root.setProperty("--accent", safeAccentHex);
+    root.setProperty("--paper", hslToHex(h, bgS(22), 93));
+    root.setProperty("--panel", hslToHex(h, bgS(20), 98));
+    root.setProperty("--line", hslToHex(h, bgS(22), 82));
+    root.setProperty("--muted", hslToHex(h, bgS(14), 42));
+    root.setProperty("--ink", hslToHex(h, bgS(22), 14));
+    return safeAccentHex;
+  }
+  function initials(name){ return name.trim().charAt(0); }
+  function slugify(str){
+    return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
+
+  function orderLink(item){
+    const msg = `Hi, I'd like to order: ${item.name} (${money(item.price)})`;
+    return `https://wa.me/${settings.whatsapp}?text=${encodeURIComponent(msg)}`;
+  }
+
+  function renderHeader(){
+    applyTheme(settings.accent);
+    document.getElementById("businessNameText").textContent = settings.businessName;
+    document.getElementById("taglineText").textContent = settings.tagline;
+    document.title = settings.businessName + " — Menu";
+    const slot = document.getElementById("logoSlot");
+    slot.innerHTML = settings.logoUrl
+      ? `<img src="${settings.logoUrl}" alt="${settings.businessName} logo">`
+      : initials(settings.businessName);
+  }
+
+  function render(){
+    if (viewMode === "detail"){
+      document.getElementById("tabs").style.display = "none";
+      renderDetail();
+      return;
+    }
+    document.getElementById("tabs").style.display = "flex";
+
+    const tabsEl = document.getElementById("tabs");
+    tabsEl.innerHTML = categories.map(c =>
+      `<button class="tab ${c === active ? "active" : ""}" data-cat="${c}">${c}</button>`
+    ).join("");
+    tabsEl.querySelectorAll(".tab").forEach(btn => {
+      btn.addEventListener("click", () => { active = btn.dataset.cat; render(); });
+    });
+
+    const visible = items.filter(i => active === "All" || i.category === active);
+    const grouped = {};
+    visible.forEach(i => { (grouped[i.category] ||= []).push(i); });
+
+    const listEl = document.getElementById("list");
+    listEl.innerHTML = Object.entries(grouped).map(([cat, group]) => `
+      <div class="group-title">${cat}</div>
+      ${group.map(item => `
+        <div class="item ${item.stock ? "" : "sold"}" id="item-${item.code}">
+          <div class="swatch">${item.photoUrl ? `<img src="${item.photoUrl}" alt="${item.name}">` : initials(item.name)}</div>
+          <div class="details">
+            <p class="name" data-open="${item.code}">${item.name}</p>
+            <p class="price">${money(item.price)}</p>
+          </div>
+          ${item.stock
+            ? `<a class="order-btn" href="${orderLink(item)}" target="_blank" rel="noopener">Order</a>`
+            : `<span class="sold-label">Sold out</span>`}
+        </div>
+      `).join("")}
+    `).join("");
+
+    listEl.querySelectorAll("[data-open]").forEach(nameEl => {
+      nameEl.addEventListener("click", () => {
+        const item = items.find(i => String(i.code) === nameEl.dataset.open);
+        openDetail(item);
+      });
+    });
+  }
+
+  function openDetail(item){
+    currentDetailItem = item;
+    viewMode = "detail";
+    try { location.hash = item.code; } catch(e) { /* some preview sandboxes block this — safe to ignore */ }
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function closeDetail(){
+    viewMode = "list";
+    currentDetailItem = null;
+    try { history.replaceState(null, "", location.pathname + location.search); } catch(e) { /* same sandbox restriction — safe to ignore */ }
+    render();
+  }
+
+  function renderDetail(){
+    const item = currentDetailItem;
+    const listEl = document.getElementById("list");
+    const otherCats = categories.filter(c => c !== "All" && c !== item.category);
+    const related = items.filter(i => i.category === item.category && i.code !== item.code);
+
+    listEl.innerHTML = `
+      <div class="detail-header">
+        <button class="back-btn" id="backBtn">←</button>
+        <span class="name-crumb">${item.name}</span>
+      </div>
+
+      <div class="detail-hero">
+        ${item.photoUrl ? `<img src="${item.photoUrl}" alt="${item.name}">` : initials(item.name)}
+      </div>
+
+      <p class="detail-name">${item.name}</p>
+      <div class="detail-meta-row">
+        <span class="detail-price">${money(item.price)}</span>
+        <span class="stock-pill ${item.stock ? "in" : ""}">${item.stock ? "In stock" : "Sold out"}</span>
+      </div>
+      <p class="listed-date">Listed on ${item.dateListed}</p>
+
+      <p class="desc-title">Description</p>
+      <div class="desc-box ${item.description ? "" : "empty"}">
+        ${item.description || "No description added yet."}
+      </div>
+
+      ${item.stock
+        ? `<a class="detail-order-btn" href="${orderLink(item)}" target="_blank" rel="noopener">Order on WhatsApp</a>`
+        : `<div class="detail-order-btn" style="background:var(--panel); color:var(--muted); cursor:default;">Currently sold out</div>`}
+
+      ${related.length ? `
+        <p class="other-cats-title">Related products</p>
+        <div class="related-grid">
+          ${related.map(r => `
+            <div class="related-card" data-related="${r.code}">
+              <div class="related-swatch">${r.photoUrl ? `<img src="${r.photoUrl}" alt="${r.name}">` : initials(r.name)}</div>
+              <p class="related-name">${r.name}</p>
+              <p class="related-price">${money(r.price)}</p>
+            </div>
+          `).join("")}
+        </div>
+      ` : ""}
+
+      ${otherCats.length ? `
+        <p class="other-cats-title">Other categories</p>
+        <div class="other-cats">
+          ${otherCats.map(c => `<button class="tab" data-browse="${c}">${c}</button>`).join("")}
+        </div>
+      ` : ""}
+    `;
+
+    document.getElementById("backBtn").onclick = closeDetail;
+    listEl.querySelectorAll("[data-related]").forEach(card => {
+      card.addEventListener("click", () => {
+        const r = items.find(i => String(i.code) === card.dataset.related);
+        openDetail(r);
+      });
+    });
+    listEl.querySelectorAll("[data-browse]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        active = btn.dataset.browse;
+        closeDetail();
+      });
+    });
+  }
+
+  function goToLinkedProduct(){
+    const targetCode = decodeURIComponent(location.hash.replace(/^#/, ""));
+    if (!targetCode) { if (viewMode === "detail") closeDetail(); return; }
+    const target = items.find(i => String(i.code) === targetCode);
+    if (!target) return;
+    currentDetailItem = target;
+    viewMode = "detail";
+    render();
+  }
+
+  async function init(){
+    document.getElementById("list").innerHTML =
+      `<p style="color:var(--muted); padding:40px 0; text-align:center;">Loading store...</p>`;
+    try{
+      await loadStore();
+    } catch(e){
+      console.error("Failed to load store:", e);
+      return; // loadStore already shows a friendly message for the visitor
+    }
+    renderHeader();
+    render();
+    goToLinkedProduct();
+  }
+
+  init();
+  window.addEventListener("hashchange", goToLinkedProduct);
+</script>
+</body>
+</html>
