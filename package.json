@@ -1,0 +1,9 @@
+{
+  "name": "veacasy",
+  "private": true,
+  "version": "0.1.0",
+  "description": "VEACASY — Vendor Easy Catalog System",
+  "dependencies": {
+    "@supabase/supabase-js": "2.116.0"
+  }
+}
