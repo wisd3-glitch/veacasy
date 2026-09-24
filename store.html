@@ -88,7 +88,7 @@ async function loadStore(){
     const slug=getSlug();if(!slug)throw new Error("Store link not found.");
     const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url").eq("slug",slug).single();
     if(ve||!v)throw new Error("Store not found.");vendor=v;
-    const{data:rows,error:pe}=await getSupabase().from("products").select("id,code,name,price,category,description,in_stock,photo_url").eq("vendor_id",v.id).order("created_at",{ascending:true});
+    const{data:rows,error:pe}=await getSupabase().from("products").select("id,code,name,price,category,description,in_stock,photo_url").eq("vendor_id",v.id);
     if(pe)throw pe;products=rows||[];applyTheme(v.accent_color||"#2196F3");document.title=`${v.business_name||"Store"} — VEACASY`;render();
   }catch(err){app.className="error";app.innerHTML=`<h2>Store unavailable</h2><p>${escapeHtml(err.message||"This store could not be loaded.")}</p>`;}
 }
