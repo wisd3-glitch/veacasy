@@ -562,7 +562,7 @@
       logoUrl: vendor.logo_url,
     };
 
-    const { data: rows, error: productsErr } = await supabase
+    const { data: rows, error: productsErr } = await getSupabase()
       .from("products")
       .select("*")
       .eq("vendor_id", currentVendorId);
