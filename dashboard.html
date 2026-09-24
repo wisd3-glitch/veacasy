@@ -257,7 +257,7 @@
     margin:12px 0 5px;
   }
   label:first-of-type{margin-top:0;}
-  input[type=text], input[type=email], input[type=number], input[type=tel], textarea, select{
+  input[type=text], input[type=number], input[type=tel], textarea, select{
     width:100%;
     border:1px solid var(--line);
     background:var(--paper);
@@ -275,22 +275,6 @@
     padding:2px;
     background:var(--paper);
   }
-
-  .settings-text-link{
-    display:inline-block;
-    margin-top:9px;
-    padding:0;
-    border:none;
-    background:none;
-    color:var(--accent);
-    font-family:'Work Sans', sans-serif;
-    font-size:12.5px;
-    font-weight:600;
-    text-decoration:underline;
-    cursor:pointer;
-  }
-  .settings-text-link:hover{ opacity:.82; }
-
   .file-drop{
     background:var(--paper);
     border-radius:7px;
@@ -556,7 +540,7 @@
 
   // Pulls this vendor's row + their products, the moment they log in.
   async function loadVendorData(){
-    const { data: vendor, error: vendorErr } = await supabase
+    const { data: vendor, error: vendorErr } = await getSupabase()
       .from("vendors")
       .select("*")
       .eq("id", currentVendorId)
@@ -715,7 +699,7 @@
           <input type="text" id="f-category" value="${p.category}" placeholder="e.g. Wigs">
           <label>Description <span style="color:var(--muted); font-weight:400;">(max 500 characters)</span></label>
           <textarea id="f-desc" maxlength="500">${p.description || ""}</textarea>
-<div id="descCounter" style="font-size:11.5px;color:var(--muted);text-align:right;margin-top:4px;">0 / 500</div>
+          <div id="descCounter" style="font-size:11.5px;color:var(--muted);text-align:right;margin-top:4px;">${(p.description || "").length} / 500</div>
           ${!isNew ? `
           <label>Product link</label>
           <div class="link-row">
@@ -727,6 +711,10 @@
             <button class="btn save" id="saveBtn">Save</button>
           </div>
         </div>`;
+
+      const descInput = document.getElementById("f-desc");
+      const descCounter = document.getElementById("descCounter");
+      descInput.addEventListener("input", () => { descCounter.textContent = `${descInput.value.length} / 500`; });
 
       document.getElementById("productPhotoDrop").onclick = () => document.getElementById("productPhotoInput").click();
       document.getElementById("productPhotoInput").onchange = (e) => {
@@ -892,8 +880,7 @@
         <div class="color-swatches" id="colorSwatches">
           ${swatches.map(c => `<button type="button" class="color-swatch ${c.toLowerCase() === settings.accent.toLowerCase() ? "selected" : ""}" data-color="${c}" style="background:${c};"></button>`).join("")}
         </div>
-        <button type="button" class="settings-text-link" id="changeColorBtn">Change store colour</button>
-        <input type="color" id="s-accent" value="${settings.accent}" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;">
+        <input type="color" id="s-accent" value="${settings.accent}" style="margin-top:8px;">
         <p style="font-size:12px; color:var(--muted); margin:6px 0 0;">This color is used for buttons and accents on your storefront.</p>
       </div>
 
@@ -922,11 +909,6 @@
       </div>`;
 
     document.getElementById("copyStoreLinkSettings").onclick = () => copyToClipboard(storeUrl());
-    document.getElementById("changeColorBtn").onclick = () => document.getElementById("s-accent").click();
-    document.getElementById("s-accent").onchange = (e) => {
-      applyTheme(e.target.value);
-      document.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("selected"));
-    };
     document.getElementById("settingsLogoDrop").onclick = () => document.getElementById("logoInput").click();
     document.querySelectorAll(".color-swatch").forEach(sw => {
       sw.onclick = () => {
@@ -1227,23 +1209,6 @@
       errorEl.classList.add("show");
     }
   });
-</script>
-
-<script>
-(function(){
-  const descInput = document.getElementById("f-desc");
-  const descCounter = document.getElementById("descCounter");
-  if (!descInput || !descCounter) return;
-
-  function updateDescCounter(){
-    const count = descInput.value.length;
-    descCounter.textContent = count + " / 500";
-    descCounter.style.color = count >= 500 ? "#a83232" : "var(--muted)";
-  }
-
-  descInput.addEventListener("input", updateDescCounter);
-  updateDescCounter();
-})();
 </script>
 
 </body>
