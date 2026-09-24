@@ -430,11 +430,6 @@
 </head>
 <body>
 
-<div id="debugPanel" style="display:none;position:fixed;inset:0;background:#fff;z-index:99999;overflow:auto;padding:20px;font-family:monospace;color:#111;">
-  <h2 style="margin-top:0;">Veacasy Connection Debug</h2>
-  <pre id="debugOutput" style="white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.5;background:#f3f3f3;padding:14px;border-radius:8px;"></pre>
-</div>
-
 <div class="login-wrap" id="loginGate">
   <div class="login-card">
     <div class="login-logo"><img src="veacasy-logo.jpeg" alt="Veacasy"></div>
@@ -545,19 +540,14 @@
 
   // Pulls this vendor's row + their products, the moment they log in.
   async function loadVendorData(){
-    const client = getSupabase();
-    const { data: vendor, error: vendorErr } = await client
+    const { data: vendor, error: vendorErr } = await supabase
       .from("vendors")
       .select("*")
       .eq("id", currentVendorId)
       .single();
 
-    if (vendorErr){
-      throw new Error("VENDORS QUERY FAILED — " + vendorErr.message + " | code=" + (vendorErr.code || "none") + " | details=" + (vendorErr.details || "none") + " | hint=" + (vendorErr.hint || "none"));
-    }
-
-    if (!vendor){
-      throw new Error("VENDORS QUERY RETURNED NO ROW for id " + currentVendorId);
+    if (vendorErr || !vendor){
+      throw new Error("No store found for this account yet — ask whoever set up your login to link your vendor row.");
     }
 
     settings = {
@@ -572,7 +562,7 @@
       logoUrl: vendor.logo_url,
     };
 
-    const { data: rows, error: productsErr } = await client
+    const { data: rows, error: productsErr } = await supabase
       .from("products")
       .select("*")
       .eq("vendor_id", currentVendorId);
@@ -1015,38 +1005,6 @@
 
   // ─── LOGIN ─────────────────────────────────────────────────────
 
-  async function runVeacasyDebug(){
-    const panel = document.getElementById("debugPanel");
-    const out = document.getElementById("debugOutput");
-    panel.style.display = "block";
-    const lines = [];
-    const add = (label, value) => lines.push(label + ": " + (typeof value === "string" ? value : JSON.stringify(value, null, 2)));
-    add("Supabase URL", SUPABASE_URL);
-    add("Current page", window.location.href);
-    try {
-      const client = getSupabase();
-      add("Supabase client", "created");
-      const { data: sessionData, error: sessionError } = await client.auth.getSession();
-      add("Session error", sessionError ? {message: sessionError.message, name: sessionError.name, status: sessionError.status, code: sessionError.code} : null);
-      add("Has session", !!sessionData?.session);
-      add("Session user ID", sessionData?.session?.user?.id || null);
-      add("Session email", sessionData?.session?.user?.email || null);
-      add("Access token present", !!sessionData?.session?.access_token);
-      if (!sessionData?.session) {
-        add("Vendors query", "SKIPPED — no browser session");
-      } else {
-        const uid = sessionData.session.user.id;
-        const { data, error } = await client.from("vendors").select("*").eq("id", uid).single();
-        add("Vendors query error", error ? {message:error.message, name:error.name, status:error.status, code:error.code, details:error.details, hint:error.hint} : null);
-        add("Vendors query data", data || null);
-        add("Vendors query returned row", !!data);
-      }
-    } catch (err) {
-      add("DEBUG SCRIPT ERROR", {message:err?.message || String(err), name:err?.name || null, stack:err?.stack || null});
-    }
-    out.textContent = lines.join("\n\n");
-  }
-
   async function checkLogin(){
     const { data: { session } } = await getSupabase().auth.getSession();
 
@@ -1065,8 +1023,7 @@
       document.getElementById("login-error").classList.add("show");
       document.getElementById("loginGate").style.display = "block";
       document.getElementById("dashboardContent").style.display = "none";
-      // Debug build: keep the browser session so the diagnostic can inspect it.
-      runVeacasyDebug();
+      await getSupabase().auth.signOut(); // don't leave them "logged in" with no store to manage
       return;
     }
 
@@ -1239,8 +1196,6 @@
     checkLogin();
   };
 
-  runVeacasyDebug().catch((err) => console.error("Veacasy debug startup error:", err));
-
   checkLogin().catch((err) => {
     console.error("Veacasy startup error:", err);
     const errorEl = document.getElementById("login-error");
@@ -1249,6 +1204,21 @@
       errorEl.classList.add("show");
     }
   });
+</script>
+
+<div id="veacasyDebugBanner" style="position:fixed;left:12px;right:12px;top:12px;z-index:99999;background:#111;color:#fff;border:3px solid #ffd54a;border-radius:14px;padding:14px;font-family:Arial,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.25)">
+<div style="font-size:18px;font-weight:800">VEACASY AUTH DEBUG PAGE</div>
+<div style="font-size:13px;margin-top:4px">If you can see this box, you are viewing the NEW debug file.</div>
+<div id="debugStatus" style="margin-top:8px;font-size:13px">Checking browser session…</div>
+<button id="debugLoginTest" type="button" style="margin-top:10px;padding:9px 12px;border:0;border-radius:8px;background:#ffd54a;color:#111;font-weight:700;cursor:pointer">Check session again</button>
+</div><div style="height:125px"></div>
+<script>
+(function(){
+ const s=document.getElementById('debugStatus');
+ function msg(t){if(s)s.textContent=t;}
+ async function check(){try{if(!window.supabase){msg('ERROR: Supabase library is not loaded.');return;} const c=window.supabase.createClient('https://bfirghwabailetfuepyh.supabase.co','sb_publishable_eKf6tIadS8Fq-wzSTl95hw_UcrELF5p',{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}); window.veacasyDebugClient=c; const r=await c.auth.getSession(); if(r.error)msg('Session check error: '+r.error.message); else if(r.data&&r.data.session)msg('SESSION FOUND: '+r.data.session.user.email+' | user ID: '+r.data.session.user.id); else msg('NO BROWSER SESSION. Log in below, then click Check session again.');}catch(e){msg('DEBUG ERROR: '+(e.message||e));}}
+ window.addEventListener('load',check); document.addEventListener('click',e=>{if(e.target&&e.target.id==='debugLoginTest')check();});
+})();
 </script>
 </body>
 </html>
