@@ -540,7 +540,7 @@
 
   // Pulls this vendor's row + their products, the moment they log in.
   async function loadVendorData(){
-    const { data: vendor, error: vendorErr } = await supabase
+    const { data: vendor, error: vendorErr } = await getSupabase()
       .from("vendors")
       .select("*")
       .eq("id", currentVendorId)
