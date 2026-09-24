@@ -546,8 +546,12 @@
       .eq("id", currentVendorId)
       .single();
 
-    if (vendorErr || !vendor){
-      throw new Error("No store found for this account yet — ask whoever set up your login to link your vendor row.");
+    if (vendorErr){
+      throw new Error("Could not load your store: " + vendorErr.message);
+    }
+
+    if (!vendor){
+      throw new Error("No store found for this account yet.");
     }
 
     settings = {
