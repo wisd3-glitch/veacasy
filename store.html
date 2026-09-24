@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VEACASY Store</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2';"></script>
+<style>
+:root{--ink:#1E2B22;--paper:#EEF3EC;--panel:#FAFBF7;--accent:#2196F3;--line:#CBD9CD;--muted:#6E7C71}
+*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:'Work Sans',sans-serif;-webkit-font-smoothing:antialiased}
+.wrap{max-width:640px;margin:0 auto;padding:24px 18px 80px}
+header{display:flex;align-items:center;gap:12px;margin-bottom:22px}
+.logo{width:58px;height:58px;border-radius:12px;background:var(--panel);overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font:20px 'Fraunces',serif}
+.logo img{width:100%;height:100%;object-fit:cover}.eyebrow{font-size:12.5px;color:var(--muted);margin:0 0 4px}
+h1{font:600 28px/1.1 'Fraunces',serif;margin:0}.tagline{font-size:13.5px;color:var(--muted);margin:6px 0 0;line-height:1.4}
+.panel{background:var(--panel);box-shadow:0 1px 3px rgba(30,43,34,.06);border-radius:10px;padding:16px;margin-bottom:14px}
+.search{width:100%;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:10px 12px;font:14px 'Work Sans',sans-serif;color:var(--ink);outline:none}
+.search:focus{border-color:var(--accent)}.categories{display:flex;gap:7px;overflow:auto;padding:2px 1px 5px;margin-bottom:14px}
+.cat{border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:999px;padding:7px 11px;font:12px 'Work Sans',sans-serif;white-space:nowrap;cursor:pointer}
+.cat.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.product{display:flex;gap:12px;padding:14px 0;border-bottom:1px solid var(--line)}.product:last-child{border-bottom:none}
+.photo{width:82px;height:82px;flex:none;border-radius:8px;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden;font:22px 'Fraunces',serif}
+.photo img{width:100%;height:100%;object-fit:cover}.details{flex:1;min-width:0}.name{font-size:15px;font-weight:600;margin:0 0 4px}
+.price{font-size:14px;font-weight:600;color:var(--accent);margin:0 0 5px}.category{font-size:11.5px;color:var(--muted);margin:0 0 6px}
+.description{font-size:12.5px;color:var(--muted);line-height:1.45;margin:0}.order{margin-top:9px;display:inline-block;background:var(--accent);color:#fff;text-decoration:none;border-radius:7px;padding:7px 10px;font-size:12px;font-weight:600}
+.sold{font-size:11.5px;color:#a83232;margin-top:9px}.empty{text-align:center;color:var(--muted);font-size:13.5px;padding:28px 8px}
+.footer{text-align:center;color:var(--muted);font-size:11.5px;margin-top:26px}.footer a{color:var(--accent);text-decoration:none;font-weight:600}
+.error{text-align:center;padding:50px 20px}.error h2{font:600 24px 'Fraunces',serif;margin:0 0 8px}.error p{color:var(--muted);font-size:13.5px;line-height:1.5}.loading{text-align:center;color:var(--muted);padding:45px 0;font-size:13.5px}
+</style>
+</head>
+<body><div class="wrap"><div id="app" class="loading">Loading store…</div></div>
+<script>
+const SUPABASE_URL="https://bfirghwabailetfuepyh.supabase.co";
+const SUPABASE_ANON_KEY="sb_publishable_eKf6tIadS8Fq-wzSTl95hw_UcrELF5p";
+const DOMAIN="veacasy.vercel.app";
+let client=null,vendor=null,products=[],activeCategory="All",searchTerm="";
+
+function getSupabase(){
+  if(client)return client;
+  if(!window.supabase||typeof window.supabase.createClient!=="function")throw new Error("Veacasy could not load its backend connection. Please refresh the page.");
+  client=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}});
+  return client;
+}
+function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
+function money(v){return "₦"+Number(v||0).toLocaleString();}
+function initials(n){return escapeHtml((n||"?").trim().charAt(0).toUpperCase());}
+function hexToHsl(hex){
+  hex=String(hex||"#2196F3").replace("#","");if(hex.length===3)hex=hex.split("").map(c=>c+c).join("");
+  const r=parseInt(hex.substr(0,2),16)/255,g=parseInt(hex.substr(2,2),16)/255,b=parseInt(hex.substr(4,2),16)/255;
+  const max=Math.max(r,g,b),min=Math.min(r,g,b);let h,s,l=(max+min)/2;
+  if(max===min){h=s=0}else{const d=max-min;s=l>.5?d/(2-max-min):d/(max+min);switch(max){case r:h=(g-b)/d+(g<b?6:0);break;case g:h=(b-r)/d+2;break;default:h=(r-g)/d+4}h/=6}
+  return{h:h*360,s:s*100,l:l*100};
+}
+function hslToHex(h,s,l){s/=100;l/=100;const k=n=>(n+h/30)%12,a=s*Math.min(l,1-l),f=n=>l-a*Math.max(-1,Math.min(k(n)-3,Math.min(9-k(n),1))),x=n=>Math.round(255*f(n)).toString(16).padStart(2,"0");return`#${x(0)}${x(8)}${x(4)}`;}
+function applyTheme(hex){
+  const{h,s,l}=hexToHsl(hex),neutral=s<4,root=document.documentElement.style;
+  root.setProperty("--accent",hslToHex(h,s,Math.min(l,55)));
+  root.setProperty("--paper",neutral?"#F2F2F2":hslToHex(h,22,93));
+  root.setProperty("--panel",neutral?"#FAFAFA":hslToHex(h,20,98));
+  root.setProperty("--line",neutral?"#D8D8D8":hslToHex(h,22,82));
+  root.setProperty("--muted",neutral?"#666":hslToHex(h,14,42));
+  root.setProperty("--ink",neutral?"#202020":hslToHex(h,22,14));
+}
+function getSlug(){const parts=location.pathname.split("/").filter(Boolean);return parts.length?decodeURIComponent(parts[parts.length-1]):"";}
+function whatsappUrl(p){
+  const n=String(vendor.whatsapp_number||"").replace(/\D/g,"");if(!n)return"#";
+  const text=`Hi ${vendor.business_name||"there"}, I'm interested in ${p.name}${p.price!=null?" ("+money(p.price)+")":""}.`;
+  return`https://wa.me/${n}?text=${encodeURIComponent(text)}`;
+}
+function filteredProducts(){const q=searchTerm.toLowerCase();return products.filter(p=>(activeCategory==="All"||(p.category||"")===activeCategory)&&(!q||[p.name,p.category,p.description].some(v=>String(v||"").toLowerCase().includes(q))));}
+function render(){
+  const app=document.getElementById("app"),cats=["All",...new Set(products.map(p=>p.category).filter(Boolean))],visible=filteredProducts();
+  app.className="";
+  app.innerHTML=`<header><div class="logo">${vendor.logo_url?`<img src="${escapeHtml(vendor.logo_url)}" alt="Logo">`:initials(vendor.business_name)}</div><div><p class="eyebrow">VEACASY store</p><h1>${escapeHtml(vendor.business_name||"Store")}</h1>${vendor.tagline?`<p class="tagline">${escapeHtml(vendor.tagline)}</p>`:""}</div></header>
+  <div class="panel"><input class="search" id="search" type="search" placeholder="Search products…" value="${escapeHtml(searchTerm)}"></div>
+  ${cats.length>1?`<div class="categories">${cats.map(c=>`<button class="cat ${c===activeCategory?"active":""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("")}</div>`:""}
+  <div class="panel"><div id="products">${visible.length?visible.map(p=>`<article class="product" id="${escapeHtml(p.code||"")}"><div class="photo">${p.photo_url?`<img src="${escapeHtml(p.photo_url)}" alt="${escapeHtml(p.name)}">`:initials(p.name)}</div><div class="details"><p class="name">${escapeHtml(p.name)}</p><p class="price">${money(p.price)}</p>${p.category?`<p class="category">${escapeHtml(p.category)}</p>`:""}${p.description?`<p class="description">${escapeHtml(p.description)}</p>`:""}${p.in_stock?`<a class="order" href="${whatsappUrl(p)}" target="_blank" rel="noopener">Order on WhatsApp</a>`:`<div class="sold">Currently unavailable</div>`}</div></article>`).join(""):`<div class="empty">No products found.</div>`}</div></div>
+  <div class="footer">${vendor.contact_email?`<div>${escapeHtml(vendor.contact_email)}</div>`:""}${vendor.phone_number?`<div>${escapeHtml(vendor.phone_number)}</div>`:""}${vendor.address?`<div>${escapeHtml(vendor.address)}</div>`:""}<div style="margin-top:8px">Powered by <a href="https://${DOMAIN}/">VEACASY</a></div></div>`;
+  document.getElementById("search").addEventListener("input",e=>{searchTerm=e.target.value;render();const i=document.getElementById("search");i.focus();i.setSelectionRange(searchTerm.length,searchTerm.length);});
+  document.querySelectorAll("[data-cat]").forEach(b=>b.addEventListener("click",()=>{activeCategory=b.dataset.cat;render();}));
+  const hash=location.hash.replace("#","");if(hash){const t=document.getElementById(hash);if(t)setTimeout(()=>t.scrollIntoView({behavior:"smooth",block:"center"}),50);}
+}
+async function loadStore(){
+  const app=document.getElementById("app");
+  try{
+    const slug=getSlug();if(!slug)throw new Error("Store link not found.");
+    const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url").eq("slug",slug).single();
+    if(ve||!v)throw new Error("Store not found.");vendor=v;
+    const{data:rows,error:pe}=await getSupabase().from("products").select("id,code,name,price,category,description,in_stock,photo_url").eq("vendor_id",v.id).order("created_at",{ascending:true});
+    if(pe)throw pe;products=rows||[];applyTheme(v.accent_color||"#2196F3");document.title=`${v.business_name||"Store"} — VEACASY`;render();
+  }catch(err){app.className="error";app.innerHTML=`<h2>Store unavailable</h2><p>${escapeHtml(err.message||"This store could not be loaded.")}</p>`;}
+}
+loadStore();
+</script>
+</body>
+</html>
