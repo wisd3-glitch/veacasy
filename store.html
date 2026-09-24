@@ -73,7 +73,7 @@ function filteredProducts(){const q=searchTerm.toLowerCase();return products.fil
 function render(){
   const app=document.getElementById("app"),cats=["All",...new Set(products.map(p=>p.category).filter(Boolean))],visible=filteredProducts();
   app.className="";
-  app.innerHTML=`<header><div class="logo">${vendor.logo_url?`<img src="${escapeHtml(vendor.logo_url)}" alt="Logo">`:initials(vendor.business_name)}</div><div><p class="eyebrow">VEACASY store</p><h1>${escapeHtml(vendor.business_name||"Store")}</h1>${vendor.tagline?`<p class="tagline">${escapeHtml(vendor.tagline)}</p>`:""}</div></header>
+  app.innerHTML=`<header><div class="logo">${vendor.logo_url?`<img src="${escapeHtml(vendor.logo_url)}" alt="Logo">`:initials(vendor.business_name)}</div><div><h1>${escapeHtml(vendor.business_name||"Store")}</h1>${vendor.tagline?`<p class="tagline">${escapeHtml(vendor.tagline)}</p>`:""}</div></header>
   <div class="panel"><input class="search" id="search" type="search" placeholder="Search products…" value="${escapeHtml(searchTerm)}"></div>
   ${cats.length>1?`<div class="categories">${cats.map(c=>`<button class="cat ${c===activeCategory?"active":""}" data-cat="${escapeHtml(c)}">${escapeHtml(c)}</button>`).join("")}</div>`:""}
   <div class="panel"><div id="products">${visible.length?visible.map(p=>`<article class="product" id="${escapeHtml(p.code||"")}"><div class="photo">${p.photo_url?`<img src="${escapeHtml(p.photo_url)}" alt="${escapeHtml(p.name)}">`:initials(p.name)}</div><div class="details"><p class="name">${escapeHtml(p.name)}</p><p class="price">${money(p.price)}</p>${p.category?`<p class="category">${escapeHtml(p.category)}</p>`:""}${p.description?`<p class="description">${escapeHtml(p.description)}</p>`:""}${p.in_stock?`<a class="order" href="${whatsappUrl(p)}" target="_blank" rel="noopener">Order on WhatsApp</a>`:`<div class="sold">Currently unavailable</div>`}</div></article>`).join(""):`<div class="empty">No products found.</div>`}</div></div>
@@ -88,7 +88,7 @@ async function loadStore(){
     const slug=getSlug();if(!slug)throw new Error("Store link not found.");
     const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url").eq("slug",slug).single();
     if(ve||!v)throw new Error("Store not found.");vendor=v;
-    const{data:rows,error:pe}=await getSupabase().from("products").select("id,code,name,price,category,description,in_stock,photo_url").eq("vendor_id",v.id);
+    const{data:rows,error:pe}=await getSupabase().from("products").select("id,code,name,price,category,description,in_stock,photo_url").eq("vendor_id",v.id).order("created_at",{ascending:true});
     if(pe)throw pe;products=rows||[];applyTheme(v.accent_color||"#2196F3");document.title=`${v.business_name||"Store"} — VEACASY`;render();
   }catch(err){app.className="error";app.innerHTML=`<h2>Store unavailable</h2><p>${escapeHtml(err.message||"This store could not be loaded.")}</p>`;}
 }
