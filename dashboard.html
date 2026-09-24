@@ -562,7 +562,7 @@
       logoUrl: vendor.logo_url,
     };
 
-    const { data: rows, error: productsErr } = await supabase
+    const { data: rows, error: productsErr } = await getSupabase()
       .from("products")
       .select("*")
       .eq("vendor_id", currentVendorId);
@@ -728,6 +728,11 @@
         };
         reader.readAsDataURL(file);
       };
+
+      document.getElementById("f-desc").addEventListener("input", (e) => {
+        const counter = document.getElementById("descCounter");
+        if (counter) counter.textContent = `${e.target.value.length} / 500`;
+      });
 
       document.getElementById("cancelBtn").onclick = () => { editingId = null; renderProductsTab(); };
       document.getElementById("saveBtn").onclick = async () => {
