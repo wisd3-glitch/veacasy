@@ -430,6 +430,11 @@
 </head>
 <body>
 
+<div id="debugPanel" style="display:none;position:fixed;inset:0;background:#fff;z-index:99999;overflow:auto;padding:20px;font-family:monospace;color:#111;">
+  <h2 style="margin-top:0;">Veacasy Connection Debug</h2>
+  <pre id="debugOutput" style="white-space:pre-wrap;word-break:break-word;font-size:13px;line-height:1.5;background:#f3f3f3;padding:14px;border-radius:8px;"></pre>
+</div>
+
 <div class="login-wrap" id="loginGate">
   <div class="login-card">
     <div class="login-logo"><img src="veacasy-logo.jpeg" alt="Veacasy"></div>
@@ -540,18 +545,19 @@
 
   // Pulls this vendor's row + their products, the moment they log in.
   async function loadVendorData(){
-    const { data: vendor, error: vendorErr } = await getSupabase()
+    const client = getSupabase();
+    const { data: vendor, error: vendorErr } = await client
       .from("vendors")
       .select("*")
       .eq("id", currentVendorId)
       .single();
 
     if (vendorErr){
-      throw new Error("Could not load your store: " + vendorErr.message);
+      throw new Error("VENDORS QUERY FAILED — " + vendorErr.message + " | code=" + (vendorErr.code || "none") + " | details=" + (vendorErr.details || "none") + " | hint=" + (vendorErr.hint || "none"));
     }
 
     if (!vendor){
-      throw new Error("No store found for this account yet.");
+      throw new Error("VENDORS QUERY RETURNED NO ROW for id " + currentVendorId);
     }
 
     settings = {
@@ -566,7 +572,7 @@
       logoUrl: vendor.logo_url,
     };
 
-    const { data: rows, error: productsErr } = await getSupabase()
+    const { data: rows, error: productsErr } = await client
       .from("products")
       .select("*")
       .eq("vendor_id", currentVendorId);
@@ -1009,6 +1015,38 @@
 
   // ─── LOGIN ─────────────────────────────────────────────────────
 
+  async function runVeacasyDebug(){
+    const panel = document.getElementById("debugPanel");
+    const out = document.getElementById("debugOutput");
+    panel.style.display = "block";
+    const lines = [];
+    const add = (label, value) => lines.push(label + ": " + (typeof value === "string" ? value : JSON.stringify(value, null, 2)));
+    add("Supabase URL", SUPABASE_URL);
+    add("Current page", window.location.href);
+    try {
+      const client = getSupabase();
+      add("Supabase client", "created");
+      const { data: sessionData, error: sessionError } = await client.auth.getSession();
+      add("Session error", sessionError ? {message: sessionError.message, name: sessionError.name, status: sessionError.status, code: sessionError.code} : null);
+      add("Has session", !!sessionData?.session);
+      add("Session user ID", sessionData?.session?.user?.id || null);
+      add("Session email", sessionData?.session?.user?.email || null);
+      add("Access token present", !!sessionData?.session?.access_token);
+      if (!sessionData?.session) {
+        add("Vendors query", "SKIPPED — no browser session");
+      } else {
+        const uid = sessionData.session.user.id;
+        const { data, error } = await client.from("vendors").select("*").eq("id", uid).single();
+        add("Vendors query error", error ? {message:error.message, name:error.name, status:error.status, code:error.code, details:error.details, hint:error.hint} : null);
+        add("Vendors query data", data || null);
+        add("Vendors query returned row", !!data);
+      }
+    } catch (err) {
+      add("DEBUG SCRIPT ERROR", {message:err?.message || String(err), name:err?.name || null, stack:err?.stack || null});
+    }
+    out.textContent = lines.join("\n\n");
+  }
+
   async function checkLogin(){
     const { data: { session } } = await getSupabase().auth.getSession();
 
@@ -1027,7 +1065,8 @@
       document.getElementById("login-error").classList.add("show");
       document.getElementById("loginGate").style.display = "block";
       document.getElementById("dashboardContent").style.display = "none";
-      await getSupabase().auth.signOut(); // don't leave them "logged in" with no store to manage
+      // Debug build: keep the browser session so the diagnostic can inspect it.
+      runVeacasyDebug();
       return;
     }
 
@@ -1199,6 +1238,8 @@
     showLoginForm();
     checkLogin();
   };
+
+  runVeacasyDebug().catch((err) => console.error("Veacasy debug startup error:", err));
 
   checkLogin().catch((err) => {
     console.error("Veacasy startup error:", err);
