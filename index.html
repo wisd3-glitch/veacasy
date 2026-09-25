@@ -106,7 +106,7 @@ img{max-width:100%;display:block}
 .btn:hover{transform:translateY(-1px)}
 .btn-primary{background:var(--blue);color:#fff;box-shadow:0 7px 18px rgba(33,150,243,.18)}
 .btn-primary:hover{background:var(--blue-dark)}
-.btn-light{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.btn-light{background:#fff;border:none;color:var(--ink)}
 .icon{width:17px;height:17px;display:inline-block;flex:none}
 .mobile-menu{display:none}
 
@@ -181,7 +181,7 @@ img{max-width:100%;display:block}
 .store-preview{
   position:relative;
   background:#fff;
-  border:1px solid var(--line);
+  border:none;
   border-radius:26px;
   box-shadow:var(--shadow);
   overflow:hidden;
@@ -214,7 +214,7 @@ img{max-width:100%;display:block}
 .preview-search{
   margin-top:13px;
   height:38px;
-  border:1px solid var(--line);
+  border:none;
   border-radius:10px;
   display:flex;align-items:center;gap:8px;
   padding:0 11px;color:#8A98A4;font-size:11px;
@@ -231,7 +231,7 @@ img{max-width:100%;display:block}
 .preview-cats span.active{background:var(--blue);color:#fff}
 .preview-products{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
 .mini-product{
-  border:1px solid var(--line);
+  border:none;
   border-radius:13px;
   overflow:hidden;
   background:#fff;
@@ -270,7 +270,7 @@ img{max-width:100%;display:block}
 }
 .trust-inner strong{color:var(--ink)}
 .trust-chip{
-  border:1px solid var(--line);
+  border:none;
   background:#fff;
   border-radius:999px;
   padding:8px 12px;
@@ -313,7 +313,7 @@ img{max-width:100%;display:block}
   overflow:hidden;
   border-radius:22px;
   background:#EAF1F5;
-  border:1px solid var(--line);
+  border:none;
 }
 .category-card img{
   width:100%;height:100%;object-fit:cover;
@@ -340,7 +340,7 @@ img{max-width:100%;display:block}
 }
 .bento-main,.bento-card{
   background:#fff;
-  border:1px solid var(--line);
+  border:none;
   border-radius:22px;
   overflow:hidden;
 }
@@ -371,7 +371,7 @@ img{max-width:100%;display:block}
 .bento-card.blue p{color:#E5F3FF}
 .dashboard-lines{
   margin-top:28px;
-  border:1px solid var(--line);
+  border:none;
   border-radius:15px;
   overflow:hidden;
 }
@@ -388,7 +388,7 @@ img{max-width:100%;display:block}
 /* STEPS */
 .steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 .step-card{
-  background:#fff;border:1px solid var(--line);
+  background:#fff;border:none;
   border-radius:20px;padding:25px;
 }
 .step-number{
@@ -403,7 +403,7 @@ img{max-width:100%;display:block}
 .stats{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  border:1px solid var(--line);
+  border:none;
   border-radius:22px;
   overflow:hidden;
   background:#fff;
@@ -420,7 +420,7 @@ img{max-width:100%;display:block}
   gap:14px;
 }
 .plan{
-  background:#fff;border:1px solid var(--line);
+  background:#fff;border:none;
   border-radius:21px;padding:26px;
 }
 .plan.featured{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
@@ -446,7 +446,7 @@ img{max-width:100%;display:block}
 }
 .faq-item summary::-webkit-details-marker{display:none}
 .faq-plus{
-  width:27px;height:27px;border:1px solid var(--line);
+  width:27px;height:27px;border:none;
   border-radius:50%;display:grid;place-items:center;
   color:var(--blue-dark);flex:none;
 }
@@ -538,6 +538,8 @@ img{max-width:100%;display:block}
   html{scroll-behavior:auto}
   *,*::before,*::after{transition:none!important}
 }
+
+.usd-equivalent{display:block;margin-top:6px;font-size:.45em;font-weight:600;letter-spacing:.01em;color:var(--muted)}
 </style>
 </head>
 
@@ -819,7 +821,7 @@ img{max-width:100%;display:block}
         <article class="plan">
           <span class="plan-label">Basic</span>
           <h3>Basic</h3>
-          <div class="plan-price">₦30,000</div>
+          <div class="plan-price">₦30,000 <span class="usd-equivalent">$20</span></div>
           <ul>
             <li>Full product catalog &amp; dashboard</li>
             <li>Your own store link</li>
@@ -831,7 +833,7 @@ img{max-width:100%;display:block}
         <article class="plan featured">
           <span class="plan-label">Popular</span>
           <h3>CEO</h3>
-          <div class="plan-price">₦80,000</div>
+          <div class="plan-price">₦80,000 <span class="usd-equivalent">$55</span></div>
           <ul>
             <li>Everything in Basic</li>
             <li>Higher product limit</li>
@@ -843,7 +845,7 @@ img{max-width:100%;display:block}
         <article class="plan">
           <span class="plan-label">Custom</span>
           <h3>Custom E-commerce</h3>
-          <div class="plan-price">₦230,000</div>
+          <div class="plan-price">₦230,000 <span class="usd-equivalent">$150</span></div>
           <ul>
             <li>A fully custom-built store</li>
             <li>Real checkout &amp; payment integration</li>
