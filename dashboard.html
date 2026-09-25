@@ -499,7 +499,7 @@
     .login-wrap{padding-top:66px;}
     .login-card{padding:30px 22px 24px;border-radius:20px;}
   }
-</style>
+.pagination-wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:14px}.pagination-summary{font-size:12px;color:var(--muted)}.pagination{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}.page-btn{min-width:32px;height:32px;padding:0 9px;border:0;background:transparent;color:var(--muted);border-radius:8px;font:500 12px inherit;cursor:pointer}.page-btn:hover:not(:disabled){background:rgba(0,0,0,.04)}.page-btn.active{background:var(--accent);color:#fff}.page-btn.nav{padding:0 10px}.page-btn:disabled{opacity:.35;cursor:default}.page-gap{font-size:12px;color:var(--muted);padding:0 2px}@media(max-width:620px){.pagination-wrap{align-items:flex-start;flex-direction:column}.pagination{width:100%;justify-content:flex-start}.page-btn.nav{order:-1}}</style>
 </head>
 <body>
 
@@ -601,7 +601,12 @@
       throw new Error("Veacasy could not load its backend connection. Please refresh the page. If this keeps happening, the Supabase library is being blocked from loading.");
     }
     supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+      auth: {
+        persistSession: true,
+        storage: window.sessionStorage,
+        autoRefreshToken: true,
+        detectSessionInUrl: true
+      }
     });
     return supabaseClient;
   }
@@ -636,12 +641,34 @@
       logoUrl: vendor.logo_url,
     };
 
-    const { data: rows, error: productsErr } = await getSupabase()
+    const { data: categoryRows, error: categoryError } = await getSupabase()
       .from("products")
-      .select("*")
+      .select("category")
+      .eq("vendor_id", currentVendorId)
+      .limit(1000);
+    if (categoryError) throw categoryError;
+    dashboardCategories = [...new Set((categoryRows || []).map(r => (r.category || "").trim()).filter(Boolean))].sort((a,b) => a.localeCompare(b));
+
+    // Load only the current dashboard page. This keeps the dashboard fast even
+    // when a vendor has more than Supabase's default 1,000-row response size.
+    await loadDashboardProducts();
+  }
+
+  async function loadDashboardProducts(){
+    const from = (dashboardPage - 1) * dashboardPageSize;
+    const to = from + dashboardPageSize - 1;
+    let query = getSupabase()
+      .from("products")
+      .select("id,code,name,price,category,in_stock,description,photo_url", { count: "exact" })
       .eq("vendor_id", currentVendorId);
 
-    if (productsErr) throw productsErr;
+    if (categoryFilter !== "All") query = query.eq("category", categoryFilter);
+
+    const { data: rows, error, count } = await query
+      .order("id", { ascending: false })
+      .range(from, to);
+
+    if (error) throw error;
 
     products = (rows || []).map(p => ({
       id: p.id,
@@ -653,6 +680,7 @@
       description: p.description || "",
       photoUrl: p.photo_url,
     }));
+    dashboardTotal = Number(count || 0);
   }
 
   // Uploads a picked File to Storage and returns its public URL.
@@ -665,8 +693,12 @@
     return data.publicUrl;
   }
 
+  let dashboardPage = 1;
+  const dashboardPageSize = 20;
+  let dashboardTotal = 0;
+  let dashboardCategories = [];
   let editingId = null; // null = list view, "new" = add form, number = editing that product
-  let categoryFilter = "All"; // dashboard-side category filter, doesn't affect the live catalog
+  let categoryFilter = "All"; // dashboard-side category filter
   let formPhotoUrl = null; // preview shown in the form
   let formPhotoFile = null; // the actual File, uploaded only when Save is clicked
 
@@ -855,6 +887,24 @@
       return;
     }
 
+    const pageCount = Math.max(1, Math.ceil(dashboardTotal / dashboardPageSize));
+    const pageItems = [];
+    const pushPage = (n) => pageItems.push(`<button class="page-btn ${n === dashboardPage ? "active" : ""}" data-page="${n}">${n}</button>`);
+    if (pageCount <= 7){
+      for (let n = 1; n <= pageCount; n++) pushPage(n);
+    } else {
+      pushPage(1);
+      if (dashboardPage > 4) pageItems.push(`<span class="page-gap">…</span>`);
+      const startPage = Math.max(2, dashboardPage - 1);
+      const endPage = Math.min(pageCount - 1, dashboardPage + 1);
+      for (let n = startPage; n <= endPage; n++) pushPage(n);
+      if (dashboardPage < pageCount - 3) pageItems.push(`<span class="page-gap">…</span>`);
+      pushPage(pageCount);
+    }
+    const firstShown = dashboardTotal ? ((dashboardPage - 1) * dashboardPageSize) + 1 : 0;
+    const lastShown = Math.min(dashboardPage * dashboardPageSize, dashboardTotal);
+    const visibleProducts = products;
+
     el.innerHTML = `
       <div class="panel">
         <div class="row-between"><h2>Store link</h2></div>
@@ -868,7 +918,7 @@
           <h2>Products</h2>
           <div class="header-actions">
             <select class="category-select" id="categoryFilterSelect">
-              ${["All", ...new Set(products.map(p => p.category).filter(Boolean))].map(c =>
+              ${["All", ...dashboardCategories].map(c =>
                 `<option value="${c}" ${c === categoryFilter ? "selected" : ""}>${c === "All" ? "All categories" : c}</option>`
               ).join("")}
             </select>
@@ -876,7 +926,7 @@
           </div>
         </div>
         <div id="productList">
-          ${(categoryFilter === "All" ? products : products.filter(p => p.category === categoryFilter)).length ? (categoryFilter === "All" ? products : products.filter(p => p.category === categoryFilter)).map(p => `
+          ${visibleProducts.length ? visibleProducts.map(p => `
             <div class="product">
               <div class="swatch">${p.photoUrl ? `<img src="${p.photoUrl}" alt="${p.name}">` : initials(p.name)}</div>
               <div class="p-details">
@@ -890,12 +940,32 @@
                 <button class="icon-btn" data-delete="${p.id}" title="Delete" aria-label="Delete product"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="m7 7 1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg></button>
               </div>
             </div>
-          `).join("") : `<div class="empty">${categoryFilter === "All" ? "No products yet — add your first one." : `No products in "${categoryFilter}" yet.`}</div>`}
+          `).join("") : `<div class="empty">${dashboardTotal ? "No products on this page." : (categoryFilter === "All" ? "No products yet — add your first one." : `No products in "${categoryFilter}" yet.`)}</div>`}
         </div>
+        ${dashboardTotal ? `<div class="pagination-wrap">
+          <span class="pagination-summary">Showing ${firstShown}–${lastShown} of ${dashboardTotal}</span>
+          <div class="pagination">
+            <button class="page-btn nav" data-page="${dashboardPage - 1}" ${dashboardPage <= 1 ? "disabled" : ""}>‹ Previous</button>
+            ${pageItems.join("")}
+            <button class="page-btn nav" data-page="${dashboardPage + 1}" ${dashboardPage >= pageCount ? "disabled" : ""}>Next ›</button>
+          </div>
+        </div>` : ""}
       </div>`;
 
     document.getElementById("copyStoreLink").onclick = () => copyToClipboard(storeUrl());
-    document.getElementById("categoryFilterSelect").onchange = (e) => { categoryFilter = e.target.value; renderProductsTab(); };
+    document.getElementById("categoryFilterSelect").onchange = async (e) => {
+      categoryFilter = e.target.value;
+      dashboardPage = 1;
+      try { await loadDashboardProducts(); renderProductsTab(); } catch (err) { showToast("Couldn't load products — try again"); }
+    };
+    el.querySelectorAll("[data-page]").forEach(btn => {
+      btn.onclick = async () => {
+        const nextPage = Number(btn.dataset.page);
+        if (!nextPage || nextPage < 1 || nextPage > pageCount || nextPage === dashboardPage) return;
+        dashboardPage = nextPage;
+        try { await loadDashboardProducts(); renderProductsTab(); } catch (err) { showToast("Couldn't load products — try again"); }
+      };
+    });
     document.getElementById("addBtn").onclick = () => { editingId = "new"; renderProductsTab(); };
     el.querySelectorAll(".toggle").forEach(btn => {
       btn.onclick = async () => {
@@ -927,8 +997,8 @@
         const id = btn.dataset.delete;
         const { error } = await getSupabase().from("products").delete().eq("id", id);
         if (error){ showToast("Couldn't delete — try again"); return; }
-        products = products.filter(x => x.id !== id);
-        renderProductsTab();
+        if (products.length === 1 && dashboardPage > 1) dashboardPage -= 1;
+        try { await loadDashboardProducts(); renderProductsTab(); } catch (err) { showToast("Couldn't reload products — try again"); return; }
         showToast("Deleted");
       };
     });
@@ -1099,6 +1169,7 @@
     }
 
     currentVendorId = session.user.id;
+    resetInactivityTimer();
 
     try {
       await loadVendorData();
@@ -1119,6 +1190,55 @@
     renderLogo();
     applyTheme(settings.accent);
   }
+
+  // ─── TAB SESSION + 30-MINUTE INACTIVITY TIMEOUT ───────────────
+  // Auth stays in this browser tab only. Any meaningful user activity
+  // resets the inactivity clock; after 30 minutes without activity the
+  // current session is signed out and the login screen is shown again.
+  const INACTIVITY_LIMIT_MS = 30 * 60 * 1000;
+  let inactivityTimer = null;
+  let lastActivityAt = Date.now();
+  let activityScheduled = false;
+
+  function resetInactivityTimer(){
+    lastActivityAt = Date.now();
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    inactivityTimer = setTimeout(enforceInactivityTimeout, INACTIVITY_LIMIT_MS);
+  }
+
+  async function enforceInactivityTimeout(){
+    const elapsed = Date.now() - lastActivityAt;
+    if (elapsed < INACTIVITY_LIMIT_MS){
+      resetInactivityTimer();
+      return;
+    }
+
+    const { data: { session } } = await getSupabase().auth.getSession();
+    if (!session) return;
+
+    await getSupabase().auth.signOut({ scope: "local" });
+    currentVendorId = null;
+    document.getElementById("login-email").value = "";
+    document.getElementById("login-password").value = "";
+    showLoginForm();
+    document.getElementById("login-error").textContent = "You were logged out after 30 minutes of inactivity.";
+    document.getElementById("login-error").classList.add("show");
+    document.getElementById("loginGate").style.display = "block";
+    document.getElementById("dashboardContent").style.display = "none";
+  }
+
+  function noteActivity(){
+    if (activityScheduled) return;
+    activityScheduled = true;
+    requestAnimationFrame(() => {
+      activityScheduled = false;
+      if (document.getElementById("dashboardContent").style.display !== "none") resetInactivityTimer();
+    });
+  }
+
+  ["pointerdown", "keydown", "scroll", "touchstart"].forEach(eventName => {
+    window.addEventListener(eventName, noteActivity, { passive: true });
+  });
 
   // ─── LOGIN / SIGNUP TOGGLE ─────────────────────────────────────
 
@@ -1272,7 +1392,8 @@
   };
 
   document.getElementById("logoutBtn").onclick = async () => {
-    await getSupabase().auth.signOut();
+    if (inactivityTimer) clearTimeout(inactivityTimer);
+    await getSupabase().auth.signOut({ scope: "local" });
     currentVendorId = null;
     document.getElementById("login-email").value = "";
     document.getElementById("login-password").value = "";
