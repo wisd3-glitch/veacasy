@@ -1,9 +1,942 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VEACASY — Vendor Easy Catalog System</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="VEACASY — Vendor Easy Catalog System. Create a professional online catalog, share one link and take orders on WhatsApp.">
+<title>VEACASY — Your products. Your brand. One simple link.</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
 <style>
-:root{--ink:#12202E;--muted:#5B6B7A;--blue:#2196F3;--paper:#F6F9FC;--panel:#fff;--line:#D9E4EC}*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:'Work Sans',sans-serif}.wrap{max-width:900px;margin:auto;padding:26px 20px 70px}.top{display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:10px;font:600 28px 'Fraunces',serif}.brand img{width:38px;height:38px;object-fit:contain;border-radius:8px}.nav{display:flex;gap:10px}.nav a{color:var(--ink);text-decoration:none;font-size:13px;padding:9px 13px;border:1px solid var(--line);border-radius:8px;background:#fff}.hero{padding:82px 0 68px;max-width:700px}.eyebrow{color:var(--blue);font-size:13px;font-weight:600;letter-spacing:.04em}.hero h1{font:600 52px/1.05 'Fraunces',serif;margin:12px 0 18px;letter-spacing:-.03em}.hero p{font-size:17px;line-height:1.65;color:var(--muted);max-width:620px}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}.primary,.secondary{display:inline-block;text-decoration:none;border-radius:9px;padding:12px 17px;font-weight:600;font-size:14px}.primary{background:var(--blue);color:#fff}.secondary{border:1px solid var(--line);background:#fff;color:var(--ink)}.features{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px}.card h2{font:600 20px 'Fraunces',serif;margin:0 0 8px}.card p{font-size:13px;line-height:1.55;color:var(--muted);margin:0}.footer{text-align:center;color:var(--muted);font-size:12px;margin-top:60px}@media(max-width:680px){.hero{padding:60px 0 48px}.hero h1{font-size:40px}.features{grid-template-columns:1fr}.top{align-items:flex-start}.nav{flex-wrap:wrap;justify-content:flex-end}}
-</style></head><body><div class="wrap"><div class="top"><div class="brand"><img src="/veacasy-logo.jpeg" alt="VEACASY logo"><span>VEACASY</span></div><div class="nav"><a href="/dashboard">Log in</a><a href="/signup">Create your store</a></div></div><main class="hero"><div class="eyebrow">VENDOR EASY CATALOG SYSTEM</div><h1>Your products. Your brand. One simple link.</h1><p>VEACASY gives sellers a simple public catalog they can share with customers. Add products, photos and prices in your dashboard, then send customers your store link or a direct product link.</p><div class="actions"><a class="primary" href="/signup">Create your store</a><a class="secondary" href="/dashboard">Log in</a></div></main><section class="features"><div class="card"><h2>Share your catalog</h2><p>Give customers one clean store link they can open on their phone.</p></div><div class="card"><h2>Share products directly</h2><p>Each product has its own public page that you can copy and send anywhere.</p></div><div class="card"><h2>Order on WhatsApp</h2><p>Customers can go straight from a product page to a WhatsApp order conversation.</p></div></section><div class="footer">Powered by VEACASY</div></div></body></html>
+:root{
+  --ink:#12202E;
+  --muted:#647483;
+  --blue:#2196F3;
+  --blue-dark:#1976D2;
+  --blue-soft:#EAF5FF;
+  --paper:#F6F9FC;
+  --panel:#FFFFFF;
+  --line:#D9E4EC;
+  --shadow:0 16px 45px rgba(18,32,46,.08);
+  --radius:20px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:var(--paper);
+  color:var(--ink);
+  font-family:"DM Sans",sans-serif;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+a{color:inherit}
+img{max-width:100%;display:block}
+.container{width:min(1160px,calc(100% - 40px));margin:auto}
+
+/* NAV */
+.site-nav{
+  position:sticky;
+  top:14px;
+  z-index:100;
+  padding-top:14px;
+}
+.nav-shell{
+  min-height:68px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:18px;
+  padding:10px 12px 10px 18px;
+  background:rgba(255,255,255,.92);
+  border:1px solid rgba(217,228,236,.95);
+  border-radius:18px;
+  box-shadow:0 10px 30px rgba(18,32,46,.06);
+  backdrop-filter:blur(10px);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+  font-size:19px;
+  font-weight:700;
+  letter-spacing:-.03em;
+}
+.brand img{
+  width:38px;
+  height:38px;
+  object-fit:contain;
+  border-radius:10px;
+}
+.nav-links{display:flex;align-items:center;gap:4px}
+.nav-links a{
+  text-decoration:none;
+  color:var(--muted);
+  font-size:13.5px;
+  font-weight:600;
+  padding:10px 13px;
+  border-radius:10px;
+  transition:background .16s ease,color .16s ease;
+}
+.nav-links a:hover{background:var(--paper);color:var(--ink)}
+.nav-actions{display:flex;align-items:center;gap:8px}
+.nav-login{
+  text-decoration:none;
+  font-size:13.5px;
+  font-weight:600;
+  padding:10px 12px;
+}
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  border:0;
+  text-decoration:none;
+  cursor:pointer;
+  font:600 14px "DM Sans",sans-serif;
+  border-radius:11px;
+  padding:12px 17px;
+  transition:transform .16s ease,box-shadow .16s ease,background .16s ease;
+}
+.btn:hover{transform:translateY(-1px)}
+.btn-primary{background:var(--blue);color:#fff;box-shadow:0 7px 18px rgba(33,150,243,.18)}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-light{background:#fff;border:1px solid var(--line);color:var(--ink)}
+.icon{width:17px;height:17px;display:inline-block;flex:none}
+.mobile-menu{display:none}
+
+/* HERO */
+.hero{
+  padding:92px 0 70px;
+}
+.hero-grid{
+  display:grid;
+  grid-template-columns:minmax(0,1.03fr) minmax(390px,.97fr);
+  align-items:center;
+  gap:70px;
+}
+.eyebrow{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:7px 10px;
+  border:1px solid #CFE8FB;
+  background:var(--blue-soft);
+  color:var(--blue-dark);
+  border-radius:999px;
+  font-size:11.5px;
+  font-weight:700;
+  letter-spacing:.07em;
+}
+.eyebrow-dot{
+  width:7px;height:7px;border-radius:50%;background:var(--blue);
+}
+.hero h1{
+  max-width:700px;
+  margin:20px 0 18px;
+  font-size:clamp(44px,6vw,72px);
+  line-height:1.02;
+  letter-spacing:-.055em;
+}
+.hero h1 span{color:var(--blue)}
+.hero-copy{
+  max-width:610px;
+  margin:0;
+  color:var(--muted);
+  font-size:17px;
+  line-height:1.72;
+}
+.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:28px}
+.micro-proof{
+  display:flex;
+  flex-wrap:wrap;
+  gap:15px 22px;
+  margin-top:22px;
+  color:var(--muted);
+  font-size:12px;
+}
+.micro-proof span{display:flex;align-items:center;gap:7px}
+.check{
+  width:17px;height:17px;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:#DDF5E7;color:#16864B;font-size:10px;font-weight:700;
+}
+
+/* HERO MOCKUP */
+.preview-wrap{position:relative}
+.preview-glow{
+  position:absolute;
+  width:280px;height:280px;
+  right:25px;top:20px;
+  background:rgba(33,150,243,.11);
+  filter:blur(50px);
+  border-radius:50%;
+  pointer-events:none;
+}
+.store-preview{
+  position:relative;
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:26px;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.preview-top{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border-bottom:1px solid var(--line);
+}
+.preview-brand{display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700}
+.preview-logo{
+  width:25px;height:25px;border-radius:7px;
+  background:var(--blue);
+  display:grid;place-items:center;color:#fff;font-size:11px;font-weight:700;
+}
+.preview-dots{display:flex;gap:4px}
+.preview-dots i{width:5px;height:5px;border-radius:50%;background:#C8D4DE}
+.preview-body{padding:20px}
+.preview-welcome{
+  padding:22px;
+  border-radius:17px;
+  background:linear-gradient(135deg,#F3F9FE,#FFFFFF);
+  border:1px solid #E4EEF5;
+}
+.preview-welcome small{color:var(--blue-dark);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.07em}
+.preview-welcome h3{margin:7px 0 5px;font-size:25px;letter-spacing:-.04em}
+.preview-welcome p{margin:0;color:var(--muted);font-size:11px}
+.preview-search{
+  margin-top:13px;
+  height:38px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  display:flex;align-items:center;gap:8px;
+  padding:0 11px;color:#8A98A4;font-size:11px;
+}
+.preview-cats{display:flex;gap:7px;overflow:hidden;margin:14px 0}
+.preview-cats span{
+  white-space:nowrap;
+  padding:7px 10px;
+  border-radius:999px;
+  background:var(--paper);
+  color:var(--muted);
+  font-size:10px;
+}
+.preview-cats span.active{background:var(--blue);color:#fff}
+.preview-products{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.mini-product{
+  border:1px solid var(--line);
+  border-radius:13px;
+  overflow:hidden;
+  background:#fff;
+}
+.mini-photo{
+  height:125px;
+  background:#EEF4F8;
+  overflow:hidden;
+}
+.mini-photo img{width:100%;height:100%;object-fit:cover}
+.mini-info{padding:10px}
+.mini-info b{display:block;font-size:11.5px}
+.mini-info span{display:block;margin-top:3px;color:var(--blue-dark);font-size:11px;font-weight:700}
+.preview-order{
+  margin-top:10px;
+  padding:12px;
+  border-radius:12px;
+  background:var(--blue);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:11px;font-weight:700;
+}
+
+/* TRUST STRIP */
+.trust-strip{
+  padding:18px 0 52px;
+}
+.trust-inner{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-wrap:wrap;
+  gap:10px;
+  color:var(--muted);
+  font-size:12px;
+}
+.trust-inner strong{color:var(--ink)}
+.trust-chip{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:999px;
+  padding:8px 12px;
+}
+
+/* SECTIONS */
+.section{padding:92px 0}
+.section.compact{padding-top:55px}
+.section-head{max-width:650px;margin-bottom:34px}
+.kicker{
+  color:var(--blue-dark);
+  text-transform:uppercase;
+  letter-spacing:.09em;
+  font-size:11px;
+  font-weight:700;
+  margin-bottom:10px;
+}
+.section h2{
+  margin:0;
+  font-size:clamp(31px,4vw,47px);
+  line-height:1.08;
+  letter-spacing:-.045em;
+}
+.section-head p{
+  margin:13px 0 0;
+  color:var(--muted);
+  font-size:15.5px;
+  line-height:1.7;
+}
+
+/* CATEGORIES */
+.category-grid{
+  display:grid;
+  grid-template-columns:1.35fr 1fr 1fr;
+  gap:14px;
+}
+.category-card{
+  position:relative;
+  min-height:360px;
+  overflow:hidden;
+  border-radius:22px;
+  background:#EAF1F5;
+  border:1px solid var(--line);
+}
+.category-card img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .3s ease;
+}
+.category-card:hover img{transform:scale(1.025)}
+.category-card:first-child{min-height:500px}
+.category-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(10,24,36,.72),rgba(10,24,36,0) 65%);
+}
+.category-copy{
+  position:absolute;left:20px;right:20px;bottom:19px;color:#fff;
+}
+.category-copy small{font-size:11px;opacity:.8}
+.category-copy h3{margin:4px 0 4px;font-size:23px;letter-spacing:-.03em}
+.category-copy p{margin:0;font-size:12.5px;opacity:.86;max-width:320px}
+
+/* FEATURE BENTO */
+.bento{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:14px;
+}
+.bento-main,.bento-card{
+  background:#fff;
+  border:1px solid var(--line);
+  border-radius:22px;
+  overflow:hidden;
+}
+.bento-main{
+  min-height:470px;
+  padding:30px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+}
+.bento-card{padding:27px;min-height:225px}
+.bento-card.blue{background:var(--blue);color:#fff;border-color:var(--blue)}
+.bento-card.soft{background:var(--blue-soft);border-color:#D2EAFB}
+.bento-side{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.bento-icon{
+  width:45px;height:45px;border-radius:13px;
+  background:var(--blue-soft);
+  color:var(--blue-dark);
+  display:grid;place-items:center;
+}
+.bento-card.blue .bento-icon{background:rgba(255,255,255,.16);color:#fff}
+.bento-card h3,.bento-main h3{
+  margin:18px 0 8px;
+  font-size:20px;
+  letter-spacing:-.025em;
+}
+.bento-card p,.bento-main p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}
+.bento-card.blue p{color:#E5F3FF}
+.dashboard-lines{
+  margin-top:28px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  overflow:hidden;
+}
+.dashboard-line{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:13px 15px;border-bottom:1px solid var(--line);
+  font-size:12px;
+}
+.dashboard-line:last-child{border-bottom:0}
+.dashboard-item{display:flex;align-items:center;gap:10px}
+.dash-thumb{width:34px;height:34px;border-radius:8px;background:#E9F0F4}
+.price{font-weight:700;color:var(--blue-dark)}
+
+/* STEPS */
+.steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.step-card{
+  background:#fff;border:1px solid var(--line);
+  border-radius:20px;padding:25px;
+}
+.step-number{
+  width:36px;height:36px;border-radius:11px;
+  background:var(--blue);color:#fff;
+  display:grid;place-items:center;font-size:12px;font-weight:700;
+}
+.step-card h3{margin:22px 0 7px;font-size:19px;letter-spacing:-.025em}
+.step-card p{margin:0;color:var(--muted);font-size:13px;line-height:1.65}
+
+/* STATS */
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  border:1px solid var(--line);
+  border-radius:22px;
+  overflow:hidden;
+  background:#fff;
+}
+.stat{padding:29px 20px;text-align:center;border-right:1px solid var(--line)}
+.stat:last-child{border-right:0}
+.stat strong{display:block;font-size:30px;letter-spacing:-.045em;color:var(--blue-dark)}
+.stat span{font-size:12px;color:var(--muted)}
+
+/* PRICING */
+.pricing{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+}
+.plan{
+  background:#fff;border:1px solid var(--line);
+  border-radius:21px;padding:26px;
+}
+.plan.featured{border-color:var(--blue);box-shadow:0 0 0 1px var(--blue)}
+.plan-label{
+  display:inline-block;padding:6px 9px;border-radius:999px;
+  background:var(--blue-soft);color:var(--blue-dark);
+  font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+}
+.plan h3{font-size:20px;margin:17px 0 5px}
+.plan-price{font-size:31px;font-weight:700;letter-spacing:-.045em}
+.plan-price span{font-size:12px;color:var(--muted);font-weight:500}
+.plan ul{padding-left:18px;margin:19px 0 0;color:var(--muted);font-size:13px;line-height:1.9}
+
+/* FAQ */
+.faq{max-width:820px}
+.faq-item{border-top:1px solid var(--line);padding:21px 0}
+.faq-item:last-child{border-bottom:1px solid var(--line)}
+.faq-item summary{
+  cursor:pointer;
+  list-style:none;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:20px;font-weight:700;font-size:15px;
+}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-plus{
+  width:27px;height:27px;border:1px solid var(--line);
+  border-radius:50%;display:grid;place-items:center;
+  color:var(--blue-dark);flex:none;
+}
+.faq-item p{margin:12px 45px 0 0;color:var(--muted);font-size:13.5px;line-height:1.7}
+
+/* CTA */
+.cta{
+  margin:15px 0 0;
+  background:var(--blue);
+  color:#fff;
+  border-radius:26px;
+  padding:56px 48px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:30px;
+}
+.cta h2{margin:0 0 9px;font-size:clamp(30px,4vw,44px);line-height:1.06;letter-spacing:-.045em}
+.cta p{margin:0;color:#DCEBFB;font-size:14px;max-width:540px}
+.cta .btn{background:#fff;color:var(--blue-dark);white-space:nowrap}
+
+/* FOOTER */
+.footer{padding:45px 0 70px}
+.footer-top{
+  display:flex;justify-content:space-between;gap:30px;
+  padding-bottom:30px;border-bottom:1px solid var(--line);
+}
+.footer-brand p{color:var(--muted);font-size:12.5px;max-width:300px}
+.footer-links{display:flex;gap:50px}
+.footer-links div{display:flex;flex-direction:column;gap:8px}
+.footer-links strong{font-size:12px}
+.footer-links a{font-size:12px;color:var(--muted);text-decoration:none}
+.footer-bottom{display:flex;justify-content:space-between;gap:15px;padding-top:20px;color:var(--muted);font-size:11px}
+
+/* FLOATING WHATSAPP */
+.wa-float{
+  position:fixed;right:20px;bottom:20px;
+  width:52px;height:52px;border-radius:50%;
+  background:#25D366;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 25px rgba(18,32,46,.18);
+  z-index:90;
+  transition:transform .16s ease;
+}
+.wa-float:hover{transform:translateY(-2px)}
+.wa-float svg{width:25px;height:25px}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .nav-links{display:none}
+  .mobile-menu{display:inline-flex}
+  .hero{padding-top:68px}
+  .hero-grid{grid-template-columns:1fr;gap:45px}
+  .hero-copy{max-width:700px}
+  .preview-wrap{max-width:600px}
+  .category-grid{grid-template-columns:1fr 1fr}
+  .category-card:first-child{grid-column:1/-1;min-height:390px}
+  .bento{grid-template-columns:1fr}
+}
+@media(max-width:680px){
+  .container{width:min(100% - 28px,1160px)}
+  .site-nav{top:7px;padding-top:7px}
+  .nav-shell{min-height:61px;border-radius:15px;padding:8px 9px 8px 12px}
+  .brand{font-size:17px}
+  .brand img{width:34px;height:34px}
+  .nav-login{display:none}
+  .nav-actions .btn{padding:10px 12px;font-size:12px}
+  .hero{padding:54px 0 45px}
+  .hero h1{font-size:45px}
+  .hero-copy{font-size:15px}
+  .hero-actions .btn{width:100%}
+  .micro-proof{gap:10px 15px}
+  .preview-body{padding:13px}
+  .preview-welcome{padding:17px}
+  .preview-welcome h3{font-size:22px}
+  .category-grid,.bento-side,.steps-grid,.pricing{grid-template-columns:1fr}
+  .category-card,.category-card:first-child{min-height:310px;grid-column:auto}
+  .section{padding:68px 0}
+  .stats{grid-template-columns:1fr 1fr}
+  .stat{border-bottom:1px solid var(--line)}
+  .stat:nth-child(2){border-right:0}
+  .stat:nth-child(3),.stat:nth-child(4){border-bottom:0}
+  .cta{padding:38px 25px;display:block;border-radius:21px}
+  .cta .btn{margin-top:22px}
+  .footer-top,.footer-bottom{flex-direction:column}
+  .footer-links{gap:30px}
+}
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition:none!important}
+}
+</style>
+</head>
+
+<body>
+
+<header class="site-nav">
+  <div class="container">
+    <div class="nav-shell">
+      <a class="brand" href="/" aria-label="VEACASY home">
+        <img src="/veacasy-logo.jpeg" alt="VEACASY logo">
+        <span>VEACASY</span>
+      </a>
+
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="#features">Features</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#plans">Plans</a>
+        <a href="#faq">FAQ</a>
+      </nav>
+
+      <div class="nav-actions">
+        <a class="nav-login" href="/dashboard">Log in</a>
+        <a class="btn btn-primary" href="/signup">Get started</a>
+        <a class="btn btn-light mobile-menu" href="/signup" aria-label="Get started">Start</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <section class="hero">
+    <div class="container hero-grid">
+      <div>
+        <div class="eyebrow"><i class="eyebrow-dot"></i> VENDOR EASY CATALOG SYSTEM</div>
+        <h1>Your products. <span>Your brand.</span> One simple link.</h1>
+        <p class="hero-copy">
+          VEACASY gives sellers a professional online catalog they can share anywhere.
+          Add your products, photos and prices once, then send customers to your store
+          or straight to a product page and take orders on WhatsApp.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="/signup">
+            Get your verified account
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+          </a>
+          <a class="btn btn-light" href="#how-it-works">See how it works</a>
+        </div>
+
+        <div class="micro-proof">
+          <span><i class="check">✓</i> Setup in minutes</span>
+          <span><i class="check">✓</i> Mobile-first</span>
+          <span><i class="check">✓</i> WhatsApp orders</span>
+        </div>
+      </div>
+
+      <div class="preview-wrap" aria-label="VEACASY storefront preview">
+        <div class="preview-glow"></div>
+        <div class="store-preview">
+          <div class="preview-top">
+            <div class="preview-brand"><div class="preview-logo">M</div> Mr Nobles Plug</div>
+            <div class="preview-dots"><i></i><i></i><i></i></div>
+          </div>
+          <div class="preview-body">
+            <div class="preview-welcome">
+              <small>YOUR ONLINE STORE</small>
+              <h3>Shop the latest.</h3>
+              <p>A clean storefront your customers can browse from any phone.</p>
+            </div>
+
+            <div class="preview-search">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+              Search products
+            </div>
+
+            <div class="preview-cats">
+              <span class="active">All</span><span>Phones</span><span>Accessories</span><span>Deals</span>
+            </div>
+
+            <div class="preview-products">
+              <article class="mini-product">
+                <div class="mini-photo">
+                  <img loading="lazy" src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?auto=format&fit=crop&w=500&q=70" alt="Smartphone product">
+                </div>
+                <div class="mini-info"><b>Samsung Galaxy</b><span>₦150,000</span></div>
+              </article>
+              <article class="mini-product">
+                <div class="mini-photo">
+                  <img loading="lazy" src="https://images.unsplash.com/photo-1603313011101-320f26a4f6f6?auto=format&fit=crop&w=500&q=70" alt="Wireless earbuds">
+                </div>
+                <div class="mini-info"><b>Wireless Buds</b><span>₦35,000</span></div>
+              </article>
+            </div>
+
+            <div class="preview-order">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 9.2 9.2 0 0 1-4-.9L3 20l.9-4A8.4 8.4 0 1 1 21 11.5Z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>
+              Order on WhatsApp
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="trust-strip">
+    <div class="container">
+      <div class="trust-inner">
+        <strong>Built for sellers who sell through:</strong>
+        <span class="trust-chip">WhatsApp</span>
+        <span class="trust-chip">Instagram</span>
+        <span class="trust-chip">TikTok</span>
+        <span class="trust-chip">Facebook</span>
+      </div>
+    </div>
+  </div>
+
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Made for real sellers</div>
+        <h2>Turn your product list into something customers want to browse.</h2>
+        <p>Professional doesn't have to mean complicated. VEACASY keeps the experience simple for you and polished for your customers.</p>
+      </div>
+
+      <div class="category-grid">
+        <article class="category-card">
+          <img loading="lazy" src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=1100&q=75" alt="Product display">
+          <div class="category-overlay"></div>
+          <div class="category-copy">
+            <small>01 / GADGETS</small>
+            <h3>Show what you sell.</h3>
+            <p>Photos, prices, descriptions and stock status in one clean product page.</p>
+          </div>
+        </article>
+
+        <article class="category-card">
+          <img loading="lazy" src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=800&q=70" alt="Fashion store">
+          <div class="category-overlay"></div>
+          <div class="category-copy">
+            <small>02 / FASHION</small>
+            <h3>Give your brand a home.</h3>
+            <p>Your logo, your color, your store link.</p>
+          </div>
+        </article>
+
+        <article class="category-card">
+          <img loading="lazy" src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?auto=format&fit=crop&w=800&q=70" alt="Beauty products">
+          <div class="category-overlay"></div>
+          <div class="category-copy">
+            <small>03 / BEAUTY</small>
+            <h3>Make details easy to find.</h3>
+            <p>Help customers understand your products before they message you.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Platform features</div>
+        <h2>Everything you need. Nothing you don't.</h2>
+        <p>From your first product to hundreds of listings, the core experience stays straightforward.</p>
+      </div>
+
+      <div class="bento">
+        <div class="bento-main">
+          <div>
+            <div class="bento-icon">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7 8h10M7 12h6M7 16h8"/></svg>
+            </div>
+            <h3>A catalog that feels like your business.</h3>
+            <p>Customers can browse categories, search products, open individual product pages and start an order without the usual back-and-forth.</p>
+          </div>
+
+          <div class="dashboard-lines">
+            <div class="dashboard-line">
+              <div class="dashboard-item"><span class="dash-thumb"></span><span>Samsung Galaxy 2</span></div>
+              <span class="price">₦150,000</span>
+            </div>
+            <div class="dashboard-line">
+              <div class="dashboard-item"><span class="dash-thumb"></span><span>Wireless Buds</span></div>
+              <span class="price">₦35,000</span>
+            </div>
+            <div class="dashboard-line">
+              <div class="dashboard-item"><span class="dash-thumb"></span><span>Phone Case</span></div>
+              <span class="price">₦8,500</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="bento-side">
+          <div class="bento-card blue">
+            <div class="bento-icon">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 11.5a8.38 8.38 0 0 1-9 8.5 9.2 9.2 0 0 1-4-.9L3 20l.9-4A8.4 8.4 0 1 1 21 11.5Z"/><path d="M8 12h.01M12 12h.01M16 12h.01"/></svg>
+            </div>
+            <h3>Orders go to WhatsApp.</h3>
+            <p>Keep the conversation where your customers already feel comfortable.</p>
+          </div>
+
+          <div class="bento-card soft">
+            <div class="bento-icon">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3v18M3 12h18"/><rect x="5" y="5" width="14" height="14" rx="3"/></svg>
+            </div>
+            <h3>Add products fast.</h3>
+            <p>Upload a photo, set a price, add a description and publish.</p>
+          </div>
+
+          <div class="bento-card">
+            <div class="bento-icon">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20V10M10 20V4M16 20v-7M22 20V7"/></svg>
+            </div>
+            <h3>Know what is in stock.</h3>
+            <p>Update product availability from your dashboard whenever you need to.</p>
+          </div>
+
+          <div class="bento-card">
+            <div class="bento-icon">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="8" r="3"/><path d="M5 20a7 7 0 0 1 14 0"/><path d="M19 5l2 2-4 4"/></svg>
+            </div>
+            <h3>Your brand stays yours.</h3>
+            <p>Use your own logo and store color so customers recognise you.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="how-it-works">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Simple process</div>
+        <h2>From sign-up to selling in three steps.</h2>
+        <p>No developer. No long setup. Just your products and a link you can share.</p>
+      </div>
+
+      <div class="steps-grid">
+        <article class="step-card">
+          <div class="step-number">01</div>
+          <h3>Create your account</h3>
+          <p>Sign up, choose your store name and set up the details customers will see.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-number">02</div>
+          <h3>Add your products</h3>
+          <p>Upload photos, prices and descriptions. Organise products into categories for easy browsing.</p>
+        </article>
+        <article class="step-card">
+          <div class="step-number">03</div>
+          <h3>Share your link</h3>
+          <p>Put your store or individual product link on WhatsApp, Instagram, TikTok and anywhere else your customers are.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container">
+      <div class="stats">
+        <div class="stat"><strong>2 min</strong><span>Average setup time</span></div>
+        <div class="stat"><strong>∞</strong><span>Orders you can receive</span></div>
+        <div class="stat"><strong>24/7</strong><span>Your store stays open</span></div>
+        <div class="stat"><strong>1 link</strong><span>To share your catalog</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="plans">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">Plans</div>
+        <h2>Choose the setup that fits your business.</h2>
+        <p>Your current pricing is kept exactly as configured on the existing VEACASY landing page.</p>
+      </div>
+
+      <div class="pricing">
+        <article class="plan">
+          <span class="plan-label">Basic</span>
+          <h3>Basic</h3>
+          <div class="plan-price">₦30,000</div>
+          <ul>
+            <li>Full product catalog &amp; dashboard</li>
+            <li>Your own store link</li>
+            <li>WhatsApp order alerts</li>
+            <li>Custom logo &amp; brand color</li>
+          </ul>
+        </article>
+
+        <article class="plan featured">
+          <span class="plan-label">Popular</span>
+          <h3>CEO</h3>
+          <div class="plan-price">₦80,000</div>
+          <ul>
+            <li>Everything in Basic</li>
+            <li>Higher product limit</li>
+            <li>Priority support</li>
+            <li>Store link on your own domain</li>
+          </ul>
+        </article>
+
+        <article class="plan">
+          <span class="plan-label">Custom</span>
+          <h3>Custom E-commerce</h3>
+          <div class="plan-price">₦230,000</div>
+          <ul>
+            <li>A fully custom-built store</li>
+            <li>Real checkout &amp; payment integration</li>
+            <li>Built and managed by our team</li>
+            <li>For sellers outgrowing a catalog</li>
+          </ul>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="faq">
+    <div class="container">
+      <div class="section-head">
+        <div class="kicker">FAQ</div>
+        <h2>Questions, answered.</h2>
+        <p>The important things before you put your store online.</p>
+      </div>
+
+      <div class="faq">
+        <details class="faq-item">
+          <summary>Do I need technical skills to use VEACASY?<span class="faq-plus">+</span></summary>
+          <p>No. If you can use WhatsApp and Instagram, you already know enough to run your store. The dashboard is designed for sellers, not developers.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How do I receive payments from customers?<span class="faq-plus">+</span></summary>
+          <p>Orders come to you directly on WhatsApp, so you collect payment the way you already do — bank transfer, cash, POS or another method you agree with your customer.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Can I customise how my store looks?<span class="faq-plus">+</span></summary>
+          <p>Yes. You can upload your logo and choose your store color from the dashboard. Your storefront is designed around your business identity.</p>
+        </details>
+        <details class="faq-item">
+          <summary>How does the WhatsApp order button work?<span class="faq-plus">+</span></summary>
+          <p>Each product can open WhatsApp with the product name and price already included in the message, making it easy for the customer to send the order.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <section class="section compact">
+    <div class="container">
+      <div class="cta">
+        <div>
+          <h2>Your next customer is one link away.</h2>
+          <p>Add your products, share your catalog and let customers browse before they message you.</p>
+        </div>
+        <a class="btn" href="/signup">
+          Get my store
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <a class="brand" href="/">
+          <img src="/veacasy-logo.jpeg" alt="VEACASY logo">
+          <span>VEACASY</span>
+        </a>
+        <p>Vendor Easy Catalog System — a simple way for sellers to put their products online and take orders on WhatsApp.</p>
+      </div>
+
+      <div class="footer-links">
+        <div>
+          <strong>Product</strong>
+          <a href="#features">Features</a>
+          <a href="#plans">Plans</a>
+          <a href="#faq">FAQ</a>
+        </div>
+        <div>
+          <strong>Get started</strong>
+          <a href="/signup">Sign up</a>
+          <a href="/dashboard">Log in</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 VEACASY. All rights reserved.</span>
+      <span>Powered by VEACASY</span>
+    </div>
+  </div>
+</footer>
+
+<a class="wa-float" href="https://wa.me/2347026438309?text=Hi%2C%20I%20have%20a%20question%20about%20VEACASY" target="_blank" rel="noopener" aria-label="Chat with VEACASY on WhatsApp">
+  <svg viewBox="0 0 24 24" fill="#fff"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.67-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.821.487 3.53 1.338 5.003L2 22l5.135-1.316A9.938 9.938 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18a7.94 7.94 0 01-4.07-1.117l-.292-.174-3.032.778.812-2.955-.19-.303A7.947 7.947 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z"/></svg>
+</a>
+
+</body>
+</html>
