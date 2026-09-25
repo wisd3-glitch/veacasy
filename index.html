@@ -161,10 +161,11 @@ img{max-width:100%;display:block}
   font-size:12px;
 }
 .micro-proof span{display:flex;align-items:center;gap:7px}
-.check{
-  width:17px;height:17px;border-radius:50%;
-  display:inline-flex;align-items:center;justify-content:center;
-  background:#DDF5E7;color:#16864B;font-size:10px;font-weight:700;
+.check-icon{
+  width:16px;height:16px;flex:none;
+  fill:none;stroke:currentColor;stroke-width:1.8;
+  stroke-linecap:round;stroke-linejoin:round;
+  color:#16864B;
 }
 
 /* HERO MOCKUP */
@@ -562,8 +563,8 @@ img{max-width:100%;display:block}
 
       <div class="nav-actions">
         <a class="nav-login" href="/dashboard">Log in</a>
-        <a class="btn btn-primary" href="/signup">Get started</a>
-        <a class="btn btn-light mobile-menu" href="/signup" aria-label="Get started">Start</a>
+        <a class="btn btn-primary" href="/dashboard">Get started</a>
+        <a class="btn btn-light mobile-menu" href="/dashboard" aria-label="Get started">Start</a>
       </div>
     </div>
   </div>
@@ -583,7 +584,7 @@ img{max-width:100%;display:block}
         </p>
 
         <div class="hero-actions">
-          <a class="btn btn-primary" href="/signup">
+          <a class="btn btn-primary" href="/dashboard">
             Get your verified account
             <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
           </a>
@@ -591,9 +592,9 @@ img{max-width:100%;display:block}
         </div>
 
         <div class="micro-proof">
-          <span><i class="check">✓</i> Setup in minutes</span>
-          <span><i class="check">✓</i> Mobile-first</span>
-          <span><i class="check">✓</i> WhatsApp orders</span>
+          <span><svg class="check-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10.5 8.2 14 15 6.8"/></svg> Setup in minutes</span>
+          <span><svg class="check-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10.5 8.2 14 15 6.8"/></svg> Mobile-first</span>
+          <span><svg class="check-icon" viewBox="0 0 20 20" aria-hidden="true"><path d="M5 10.5 8.2 14 15 6.8"/></svg> WhatsApp orders</span>
         </div>
       </div>
 
@@ -893,7 +894,7 @@ img{max-width:100%;display:block}
           <h2>Your next customer is one link away.</h2>
           <p>Add your products, share your catalog and let customers browse before they message you.</p>
         </div>
-        <a class="btn" href="/signup">
+        <a class="btn" href="/dashboard">
           Get my store
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14"/><path d="m13 6 6 6-6 6"/></svg>
         </a>
@@ -923,7 +924,7 @@ img{max-width:100%;display:block}
         </div>
         <div>
           <strong>Get started</strong>
-          <a href="/signup">Sign up</a>
+          <a href="/dashboard">Sign up</a>
           <a href="/dashboard">Log in</a>
         </div>
       </div>
