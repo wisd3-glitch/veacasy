@@ -432,7 +432,7 @@
 
 <div class="login-wrap" id="loginGate">
   <div class="login-card">
-    <div class="login-logo"><img src="veacasy-logo.jpeg" alt="Veacasy"></div>
+    <div class="login-logo"><img src="/veacasy-logo.jpeg" alt="VEACASY"></div>
 
     <div id="loginForm">
       <h1>Welcome back</h1>
@@ -665,7 +665,7 @@
     return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
   }
   function storeUrl(){ return `${DOMAIN}/${settings.slug}/`; }
-  function productUrl(p){ return `${DOMAIN}/${settings.slug}/#${p.code}`; }
+  function productUrl(p){ return `${DOMAIN}/${settings.slug}/${encodeURIComponent(p.code)}/`; }
 
   function copyToClipboard(text){
     if (navigator.clipboard && navigator.clipboard.writeText){
