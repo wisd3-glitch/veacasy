@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Veacasy — Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+  onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2';"></script>
+<style>
+  :root{
+    --ink:#1E2B22;
+    --paper:#EEF3EC;
+    --panel:#FAFBF7;
+    --accent:#2196F3; /* new-signup default — blue, until a seller picks their own */
+    --line:#CBD9CD;
+    --muted:#6E7C71;
+    /* Fixed Veacasy brand colors — the login/signup screen always uses these two,
+       never the dynamic --accent tokens above, regardless of any vendor's theme. */
+    --brand-blue:#2196F3;
+    --brand-white:#FFFFFF;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:640px; margin:0 auto; padding:24px 18px 80px;}
+
+  header{
+    margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .logo-slot{
+    flex:none;
+    width:52px; height:52px;
+    border-radius:10px;
+    background:var(--panel);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    overflow:hidden;
+    color:var(--muted);
+    font-size:10.5px;
+    text-align:center;
+    line-height:1.2;
+  }
+  .logo-slot img{
+    width:100%; height:100%;
+    object-fit:cover;
+  }
+  .logo-slot:hover{ color:var(--accent); }
+  .eyebrow{font-size:12.5px; color:var(--muted); margin:0 0 4px;}
+  h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:26px;
+    margin:0;
+  }
+
+  nav{
+    display:flex;
+    gap:6px;
+    background:var(--line);
+    padding:4px;
+    border-radius:10px;
+    margin-bottom:20px;
+  }
+  nav button{
+    flex:1;
+    border:none;
+    background:transparent;
+    padding:10px 0;
+    font-family:'Work Sans', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    color:var(--ink);
+    border-radius:7px;
+    cursor:pointer;
+  }
+  nav button.active{ background:var(--panel); }
+
+  .panel{
+    background:var(--panel);
+    box-shadow:0 1px 3px rgba(30,43,34,0.06);
+    border-radius:10px;
+    padding:16px;
+    margin-bottom:14px;
+  }
+
+  .row-between{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:14px;
+  }
+  .row-between h2{
+    font-family:'Fraunces', serif;
+    font-size:17px;
+    margin:0;
+    font-weight:600;
+  }
+  .add-btn{
+    background:var(--accent);
+    color:var(--panel);
+    border:none;
+    font-size:13px;
+    font-weight:500;
+    padding:8px 14px;
+    border-radius:7px;
+    cursor:pointer;
+  }
+  .header-actions{
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .category-select{
+    background:var(--paper);
+    color:var(--ink);
+    border:none;
+    border-radius:7px;
+    padding:7px 9px;
+    font-family:'Work Sans', sans-serif;
+    font-size:12.5px;
+    cursor:pointer;
+  }
+
+  /* Store link block */
+  .color-swatches{
+    display:flex;
+    flex-wrap:wrap;
+    gap:9px;
+  }
+  .color-swatch{
+    width:30px; height:30px;
+    border-radius:50%;
+    border:2px solid transparent;
+    cursor:pointer;
+    padding:0;
+  }
+  .color-swatch.selected{
+    border-color:var(--ink);
+    box-shadow:0 0 0 2px var(--panel);
+  }
+  .link-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    background:var(--paper);
+    border:none;
+    border-radius:7px;
+    padding:9px 10px;
+  }
+  .link-row .url{
+    flex:1;
+    min-width:0;
+    font-size:12.5px;
+    color:var(--muted);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .copy-btn{
+    flex:none;
+    background:var(--accent);
+    color:var(--panel);
+    border:none;
+    font-size:12px;
+    font-weight:500;
+    padding:6px 11px;
+    border-radius:6px;
+    cursor:pointer;
+  }
+  .copy-btn.ghost{
+    background:transparent;
+    color:var(--accent);
+    border:1px solid var(--accent);
+  }
+
+  .product{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:12px 0;
+    border-bottom:1px solid var(--line);
+  }
+  .product:last-child{border-bottom:none;}
+  .swatch{
+    flex:none;
+    width:46px; height:46px;
+    border-radius:6px;
+    background:var(--accent);
+    color:var(--panel);
+    font-family:'Fraunces', serif;
+    font-size:16px;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+  }
+  .swatch img{ width:100%; height:100%; object-fit:cover; }
+  .p-details{flex:1; min-width:0;}
+  .p-name{font-size:14.5px; font-weight:500; margin:0 0 2px;}
+  .p-meta{font-size:12.5px; color:var(--muted); margin:0;}
+
+  .toggle{
+    flex:none;
+    width:38px; height:22px;
+    border-radius:999px;
+    background:var(--line);
+    position:relative;
+    cursor:pointer;
+    border:none;
+    padding:0;
+  }
+  .toggle.on{ background:var(--accent); }
+  .toggle .dot{
+    position:absolute; top:2px; left:2px;
+    width:18px; height:18px;
+    border-radius:50%;
+    background:var(--panel);
+    transition:transform .15s ease;
+  }
+  .toggle.on .dot{ transform:translateX(16px); }
+
+  .actions{
+    flex:none;
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .icon-btn{
+    width:32px;
+    height:32px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    background:var(--paper);
+    border:1px solid var(--line);
+    color:var(--muted);
+    border-radius:8px;
+    cursor:pointer;
+    padding:0;
+    line-height:1;
+    transition:background .15s ease,color .15s ease,border-color .15s ease;
+  }
+  .icon-btn:hover{
+    color:var(--ink);
+    border-color:var(--accent);
+    background:var(--panel);
+  }
+  .icon-btn.delete:hover{
+    color:#B42318;
+    border-color:#F0B4AE;
+    background:#FFF5F4;
+  }
+  .icon-btn svg{
+    width:16px;
+    height:16px;
+    stroke:currentColor;
+    fill:none;
+    stroke-width:1.8;
+    stroke-linecap:round;
+    stroke-linejoin:round;
+  }
+
+  .empty{
+    text-align:center;
+    color:var(--muted);
+    font-size:13.5px;
+    padding:24px 0;
+  }
+
+  label{
+    display:block;
+    font-size:12.5px;
+    color:var(--muted);
+    margin:12px 0 5px;
+  }
+  label:first-of-type{margin-top:0;}
+  input[type=text], input[type=email], input[type=number], input[type=tel], textarea, select{
+    width:100%;
+    border:1px solid var(--line);
+    background:var(--paper);
+    border-radius:7px;
+    padding:9px 11px;
+    font-family:'Work Sans', sans-serif;
+    font-size:14px;
+    color:var(--ink);
+  }
+  textarea{resize:vertical; min-height:56px;}
+  input[type=color]{
+    position:absolute;
+    width:1px;
+    height:1px;
+    opacity:0;
+    pointer-events:none;
+  }
+  .change-color-link{
+    display:inline-block;
+    margin-top:8px;
+    color:var(--accent);
+    font-size:12.5px;
+    font-weight:500;
+    text-decoration:underline;
+    cursor:pointer;
+  }
+  .file-drop{
+    background:var(--paper);
+    border-radius:7px;
+    padding:16px;
+    text-align:center;
+    color:var(--muted);
+    font-size:12.5px;
+  }
+  .file-drop img{
+    width:56px !important;
+    height:56px !important;
+    max-width:56px;
+    max-height:56px;
+    object-fit:contain;
+    display:block;
+    margin:0 auto 8px;
+    border-radius:10px;
+  }
+
+  .form-actions{
+    display:flex; gap:8px; margin-top:16px;
+  }
+  .btn{
+    flex:1;
+    border:none;
+    padding:10px 0;
+    border-radius:7px;
+    font-family:'Work Sans', sans-serif;
+    font-size:13.5px;
+    font-weight:500;
+    cursor:pointer;
+  }
+  .btn.save{ background:var(--accent); color:var(--panel); }
+  .btn.cancel{ background:var(--line); color:var(--ink); }
+
+  .toast{
+    position:fixed;
+    bottom:20px; left:50%; transform:translateX(-50%);
+    background:var(--ink);
+    color:var(--paper);
+    font-size:13px;
+    padding:10px 18px;
+    border-radius:999px;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .2s ease;
+  }
+  .toast.show{ opacity:1; }
+
+  /* Login / signup gate — fixed Veacasy brand colors only (blue + white).
+     Deliberately NOT using --accent/--paper/--ink etc: those get overwritten
+     by applyTheme() once a vendor logs in, and this screen must never change
+     no matter whose theme was last active in this browser tab. */
+  .login-wrap{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px 18px;
+    background:#FFFFFF;
+  }
+  .login-card{
+    width:100%;
+    max-width:360px;
+    background:#FFFFFF;
+    border-radius:16px;
+    padding:36px 30px 30px;
+    box-shadow:0 4px 24px rgba(33,150,243,0.12);
+  }
+  .login-logo{
+    width:52px; height:52px;
+    border-radius:12px;
+    overflow:hidden;
+    margin-bottom:18px;
+  }
+  .login-logo img{ width:100%; height:100%; object-fit:contain; }
+  .login-card h1{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    font-size:21px;
+    margin:0 0 5px;
+    letter-spacing:-0.01em;
+    color:#12202E;
+  }
+  .login-card p{
+    font-size:13px;
+    color:#5B6B7A;
+    margin:0 0 26px;
+    line-height:1.4;
+  }
+  .login-field{ margin-bottom:16px; text-align:left; }
+  .login-field label{
+    display:block;
+    font-size:12px;
+    font-weight:500;
+    color:#5B6B7A;
+    margin-bottom:6px;
+  }
+  .login-card input{
+    width:100%;
+    border:1.5px solid #D9E4EC;
+    background:#FAFCFE;
+    border-radius:9px;
+    padding:11px 13px;
+    font-family:'Work Sans', sans-serif;
+    font-size:14.5px;
+    color:#12202E;
+    transition:border-color .15s ease;
+  }
+  .login-card input:focus{
+    outline:none;
+    border-color:#2196F3;
+  }
+  .login-btn{
+    width:100%;
+    background:#2196F3;
+    color:#FFFFFF;
+    border:none;
+    padding:12px 0;
+    border-radius:9px;
+    font-family:'Work Sans', sans-serif;
+    font-size:14.5px;
+    font-weight:600;
+    cursor:pointer;
+    margin-top:6px;
+    letter-spacing:0.01em;
+  }
+  .login-btn:active{ opacity:0.9; }
+  .login-switch{
+    text-align:center;
+    font-size:13px;
+    color:#5B6B7A;
+    margin-top:18px;
+  }
+  .login-switch button{
+    background:none;
+    border:none;
+    color:#2196F3;
+    font-weight:600;
+    cursor:pointer;
+    font-size:13px;
+    padding:0;
+  }
+  .login-error{
+    color:#a83232;
+    background:rgba(168,50,50,0.08);
+    border-radius:7px;
+    font-size:12.5px;
+    padding:9px 11px;
+    margin:0 0 16px;
+    display:none;
+  }
+  .login-error.show{ display:block; }
+  .logout-link{
+    background:none;
+    border:none;
+    color:var(--muted);
+    font-size:12px;
+    cursor:pointer;
+    text-decoration:underline;
+  }
+</style>
+</head>
+<body>
+
+<div class="login-wrap" id="loginGate">
+  <div class="login-card">
+    <div class="login-logo"><img src="/veacasy-logo.jpeg" alt="Veacasy"></div>
+
+    <div id="loginForm">
+      <h1>Welcome back</h1>
+      <p>Log in to manage your store</p>
+      <p class="login-error" id="login-error"></p>
+      <div class="login-field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com">
+      </div>
+      <div class="login-field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" placeholder="••••••••">
+      </div>
+      <button class="login-btn" id="login-btn">Log in</button>
+      <p class="login-switch">New to Veacasy? <button id="showSignup">Create your store</button></p>
+    </div>
+
+    <div id="signupForm" style="display:none;">
+      <h1>Create your store</h1>
+      <p>Set up your Veacasy catalog in a couple minutes</p>
+      <p class="login-error" id="signup-error"></p>
+      <div class="login-field">
+        <label for="signup-name">Business name</label>
+        <input type="text" id="signup-name" placeholder="e.g. Sparkles by Annie">
+      </div>
+      <div class="login-field">
+        <label for="signup-slug">Your store link</label>
+        <input type="text" id="signup-slug" placeholder="auto-fills from business name">
+      </div>
+      <div class="login-field">
+        <label for="signup-whatsapp">WhatsApp number</label>
+        <input type="tel" id="signup-whatsapp" placeholder="2348012345678">
+      </div>
+      <div class="login-field">
+        <label for="signup-email">Email</label>
+        <input type="email" id="signup-email" placeholder="you@example.com">
+      </div>
+      <div class="login-field">
+        <label for="signup-password">Password</label>
+        <input type="password" id="signup-password" placeholder="At least 6 characters">
+      </div>
+      <div class="login-field">
+        <label for="signup-invite">Invite code</label>
+        <input type="tel" id="signup-invite" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit code">
+      </div>
+      <button class="login-btn" id="signup-btn">Create store</button>
+      <p class="login-switch">Already have a store? <button id="showLogin">Log in</button></p>
+    </div>
+  </div>
+</div>
+
+<div id="dashboardContent" style="display:none;">
+<div class="wrap">
+  <header>
+    <div class="logo-slot" id="logoSlot">+ Logo</div>
+    <div>
+      <p class="eyebrow">Your store</p>
+      <h1>Dashboard</h1>
+    </div>
+    <input type="file" id="logoInput" accept="image/*" style="display:none;">
+  </header>
+
+  <nav>
+    <button class="active" data-tab="products">Products</button>
+    <button data-tab="settings">Store Settings</button>
+  </nav>
+
+  <div id="productsTab"></div>
+  <div id="settingsTab" style="display:none;"></div>
+
+  <p style="text-align:center; margin-top:10px;">
+    <button class="logout-link" id="logoutBtn">Log out</button>
+  </p>
+</div>
+</div>
+
+<div class="toast" id="toast">Saved</div>
+
+
+<script>
+  // ─── SUPABASE CONNECTION ──────────────────────────────────────
+  // Paste your own project's values here — Supabase dashboard →
+  // Settings → API. Safe to leave visible in this file: RLS is what
+  // actually protects the data, not hiding this key.
+  const SUPABASE_URL = "https://bfirghwabailetfuepyh.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_eKf6tIadS8Fq-wzSTl95hw_UcrELF5p";
+  let supabaseClient = null;
+
+  function getSupabase(){
+    if (supabaseClient) return supabaseClient;
+    if (!window.supabase || typeof window.supabase.createClient !== "function") {
+      throw new Error("Veacasy could not load its backend connection. Please refresh the page. If this keeps happening, the Supabase library is being blocked from loading.");
+    }
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+      auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+    });
+    return supabaseClient;
+  }
+
+  const DOMAIN = "veacasy.vercel.app"; // update to veacasy.com once that domain is live
+
+  let products = [];
+  let settings = {};
+  let currentVendorId = null; // the logged-in vendor's row id — same as their auth id
+
+  // Pulls this vendor's row + their products, the moment they log in.
+  async function loadVendorData(){
+    const { data: vendor, error: vendorErr } = await getSupabase()
+      .from("vendors")
+      .select("*")
+      .eq("id", currentVendorId)
+      .single();
+
+    if (vendorErr || !vendor){
+      throw new Error("No store found for this account yet — ask whoever set up your login to link your vendor row.");
+    }
+
+    settings = {
+      businessName: vendor.business_name || "",
+      tagline: vendor.tagline || "",
+      whatsapp: vendor.whatsapp_number || "",
+      contactEmail: vendor.contact_email || "",
+      phone: vendor.phone_number || "",
+      address: vendor.address || "",
+      slug: vendor.slug || "",
+      accent: vendor.accent_color || "#2196F3",
+      logoUrl: vendor.logo_url,
+    };
+
+    const { data: rows, error: productsErr } = await getSupabase()
+      .from("products")
+      .select("*")
+      .eq("vendor_id", currentVendorId);
+
+    if (productsErr) throw productsErr;
+
+    products = (rows || []).map(p => ({
+      id: p.id,
+      code: p.code,
+      name: p.name,
+      price: p.price,
+      category: p.category || "",
+      inStock: p.in_stock,
+      description: p.description || "",
+      photoUrl: p.photo_url,
+    }));
+  }
+
+  // Uploads a picked File to Storage and returns its public URL.
+  // Used for both product photos and the store logo.
+  async function uploadPhoto(file, folder){
+    const path = `${folder}/${currentVendorId}/${Date.now()}-${file.name}`;
+    const { error } = await getSupabase().storage.from("product-photos").upload(path, file);
+    if (error) throw error;
+    const { data } = getSupabase().storage.from("product-photos").getPublicUrl(path);
+    return data.publicUrl;
+  }
+
+  let editingId = null; // null = list view, "new" = add form, number = editing that product
+  let categoryFilter = "All"; // dashboard-side category filter, doesn't affect the live catalog
+  let formPhotoUrl = null; // preview shown in the form
+  let formPhotoFile = null; // the actual File, uploaded only when Save is clicked
+
+  function photoDropInner(){
+    return formPhotoUrl
+      ? `<img src="${formPhotoUrl}" alt="Product photo" style="width:100%;max-width:120px;height:80px;object-fit:cover;border-radius:6px;">`
+      : "Tap to upload a photo";
+  }
+
+  function showToast(msg){
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(() => t.classList.remove("show"), 1400);
+  }
+
+  function money(n){ return "₦" + Number(n).toLocaleString(); }
+  function initials(name){ return name.trim().charAt(0); }
+
+  function hexToHsl(hex){
+    hex = hex.replace("#", "");
+    if (hex.length === 3) hex = hex.split("").map(c => c + c).join("");
+    const r = parseInt(hex.substr(0,2),16)/255, g = parseInt(hex.substr(2,2),16)/255, b = parseInt(hex.substr(4,2),16)/255;
+    const max = Math.max(r,g,b), min = Math.min(r,g,b);
+    let h, s, l = (max+min)/2;
+    if (max === min){ h = s = 0; }
+    else{
+      const d = max - min;
+      s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+      switch(max){
+        case r: h = (g-b)/d + (g<b?6:0); break;
+        case g: h = (b-r)/d + 2; break;
+        default: h = (r-g)/d + 4;
+      }
+      h /= 6;
+    }
+    return { h: h*360, s: s*100, l: l*100 };
+  }
+
+  function hslToHex(h, s, l){
+    s/=100; l/=100;
+    const k = n => (n + h/30) % 12;
+    const a = s * Math.min(l, 1-l);
+    const f = n => l - a * Math.max(-1, Math.min(k(n)-3, Math.min(9-k(n), 1)));
+    const toHex = x => Math.round(255*x).toString(16).padStart(2,"0");
+    return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+  }
+
+  // Picking one accent color re-tints the whole page — background, panels,
+  // borders and text all shift to the same hue, just at very different
+  // lightness levels so contrast stays readable no matter what's picked.
+  function applyTheme(accentHex){
+    const { h, s, l } = hexToHsl(accentHex);
+    const isNeutral = s < 4; // true black / white / gray — hue is meaningless here, don't fake a tint
+    const maxAccentLightness = 55; // caps how pale the accent can be, so light button text stays readable
+    const safeL = Math.min(l, maxAccentLightness); // black (l=0) passes straight through untouched
+    const safeAccentHex = hslToHex(h, s, safeL);
+    const bgS = tone => isNeutral ? 0 : tone; // neutral picks get a true gray theme, not a false tint
+
+    const root = document.documentElement.style;
+    root.setProperty("--accent", safeAccentHex);
+    root.setProperty("--paper", hslToHex(h, bgS(22), 93));
+    root.setProperty("--panel", hslToHex(h, bgS(20), 98));
+    root.setProperty("--line", hslToHex(h, bgS(22), 82));
+    root.setProperty("--muted", hslToHex(h, bgS(14), 42));
+    root.setProperty("--ink", hslToHex(h, bgS(22), 14));
+    return safeAccentHex;
+  }
+  function slugify(str){
+    return str.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
+  function storeUrl(){ return `${DOMAIN}/${settings.slug}/`; }
+  function productUrl(p){ return `${DOMAIN}/${settings.slug}/${encodeURIComponent(p.code)}/`; }
+
+  function copyToClipboard(text){
+    if (navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText("https://" + text).catch(() => {});
+    }
+    showToast("Link copied");
+  }
+
+  function renderProductsTab(){
+    const el = document.getElementById("productsTab");
+
+    if (editingId !== null){
+      const isNew = editingId === "new";
+      const p = isNew
+        ? { name:"", price:"", category:"", description:"" }
+        : products.find(x => x.id === editingId);
+      formPhotoUrl = p.photoUrl || null;
+      formPhotoFile = null;
+
+      el.innerHTML = `
+        <div class="panel">
+          <div class="row-between"><h2>${isNew ? "Add product" : "Edit product"}</h2></div>
+          <label>Photo</label>
+          <div class="file-drop" id="productPhotoDrop" style="cursor:pointer;">${photoDropInner()}</div>
+          <input type="file" id="productPhotoInput" accept="image/*" style="display:none;">
+          <label>Name</label>
+          <input type="text" id="f-name" value="${p.name}">
+          <label>Price (₦)</label>
+          <input type="number" id="f-price" value="${p.price}">
+          <label>Category</label>
+          <input type="text" id="f-category" value="${p.category}" placeholder="e.g. Wigs">
+          <label>Description <span style="color:var(--muted); font-weight:400;">(max 500 characters)</span></label>
+          <textarea id="f-desc" maxlength="500">${p.description || ""}</textarea>
+          <div id="descCounter" style="font-size:11.5px;color:var(--muted);text-align:right;margin-top:4px;">${(p.description || "").length} / 500</div>
+          ${!isNew ? `
+          <label>Product link</label>
+          <div class="link-row">
+            <span class="url">${productUrl(p)}</span>
+            <button class="copy-btn" id="copyProductLink">Copy</button>
+          </div>` : ""}
+          <div class="form-actions">
+            <button class="btn cancel" id="cancelBtn">Cancel</button>
+            <button class="btn save" id="saveBtn">Save</button>
+          </div>
+        </div>`;
+
+      const descInput = document.getElementById("f-desc");
+      const descCounter = document.getElementById("descCounter");
+      descInput.addEventListener("input", () => { descCounter.textContent = `${descInput.value.length} / 500`; });
+
+      document.getElementById("productPhotoDrop").onclick = () => document.getElementById("productPhotoInput").click();
+      document.getElementById("productPhotoInput").onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        formPhotoFile = file;
+        const reader = new FileReader();
+        reader.onload = () => {
+          formPhotoUrl = reader.result; // local preview only, until Save actually uploads it
+          document.getElementById("productPhotoDrop").innerHTML = photoDropInner();
+        };
+        reader.readAsDataURL(file);
+      };
+
+      document.getElementById("f-desc").addEventListener("input", (e) => {
+        const counter = document.getElementById("descCounter");
+        if (counter) counter.textContent = `${e.target.value.length} / 500`;
+      });
+
+      document.getElementById("cancelBtn").onclick = () => { editingId = null; renderProductsTab(); };
+      document.getElementById("saveBtn").onclick = async () => {
+        const name = document.getElementById("f-name").value.trim();
+        const price = Number(document.getElementById("f-price").value) || 0;
+        const category = document.getElementById("f-category").value.trim();
+        const description = document.getElementById("f-desc").value.trim();
+        if (!name){ return; }
+
+        const saveBtn = document.getElementById("saveBtn");
+        saveBtn.textContent = "Saving...";
+        saveBtn.disabled = true;
+
+        try {
+          let photoUrl = p.photoUrl || null;
+          if (formPhotoFile){
+            photoUrl = await uploadPhoto(formPhotoFile, "products");
+          }
+
+          if (isNew){
+            const { error } = await getSupabase().from("products").insert({
+              vendor_id: currentVendorId, name, price, category, description,
+              in_stock: true, photo_url: photoUrl,
+            });
+            if (error) throw error;
+          } else {
+            const { error } = await getSupabase().from("products")
+              .update({ name, price, category, description, photo_url: photoUrl })
+              .eq("id", p.id);
+            if (error) throw error;
+          }
+
+          await loadVendorData();
+          editingId = null;
+          renderProductsTab();
+          showToast("Saved");
+        } catch (err) {
+          showToast("Couldn't save — " + err.message);
+          saveBtn.textContent = "Save";
+          saveBtn.disabled = false;
+        }
+      };
+      if (!isNew){
+        document.getElementById("copyProductLink").onclick = () => copyToClipboard(productUrl(p));
+      }
+      return;
+    }
+
+    el.innerHTML = `
+      <div class="panel">
+        <div class="row-between"><h2>Store link</h2></div>
+        <div class="link-row">
+          <span class="url">${storeUrl()}</span>
+          <button class="copy-btn" id="copyStoreLink">Copy</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="row-between">
+          <h2>Products</h2>
+          <div class="header-actions">
+            <select class="category-select" id="categoryFilterSelect">
+              ${["All", ...new Set(products.map(p => p.category).filter(Boolean))].map(c =>
+                `<option value="${c}" ${c === categoryFilter ? "selected" : ""}>${c === "All" ? "All categories" : c}</option>`
+              ).join("")}
+            </select>
+            <button class="add-btn" id="addBtn">+ Add product</button>
+          </div>
+        </div>
+        <div id="productList">
+          ${(categoryFilter === "All" ? products : products.filter(p => p.category === categoryFilter)).length ? (categoryFilter === "All" ? products : products.filter(p => p.category === categoryFilter)).map(p => `
+            <div class="product">
+              <div class="swatch">${p.photoUrl ? `<img src="${p.photoUrl}" alt="${p.name}">` : initials(p.name)}</div>
+              <div class="p-details">
+                <p class="p-name">${p.name}</p>
+                <p class="p-meta">${money(p.price)} · ${p.category || "Uncategorized"}</p>
+              </div>
+              <button class="toggle ${p.inStock ? "on" : ""}" data-id="${p.id}" title="In stock"><span class="dot"></span></button>
+              <div class="actions">
+                <button class="icon-btn" data-link="${p.id}" title="Copy product link" aria-label="Copy product link">
+                  <svg viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.07.07l2-2a5 5 0 0 0-7.07-7.07l-1.15 1.15"></path><path d="M14 11a5 5 0 0 0-7.07-.07l-2 2A5 5 0 0 0 7 20l1.15-1.15"></path></svg>
+                </button>
+                <button class="icon-btn" data-edit="${p.id}" title="Edit product" aria-label="Edit product">
+                  <svg viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"></path></svg>
+                </button>
+                <button class="icon-btn delete" data-delete="${p.id}" title="Delete product" aria-label="Delete product">
+                  <svg viewBox="0 0 24 24"><path d="M3 6h18"></path><path d="M8 6V4h8v2"></path><path d="M19 6l-1 14H6L5 6"></path><path d="M10 11v5M14 11v5"></path></svg>
+                </button>
+              </div>
+            </div>
+          `).join("") : `<div class="empty">${categoryFilter === "All" ? "No products yet — add your first one." : `No products in "${categoryFilter}" yet.`}</div>`}
+        </div>
+      </div>`;
+
+    document.getElementById("copyStoreLink").onclick = () => copyToClipboard(storeUrl());
+    document.getElementById("categoryFilterSelect").onchange = (e) => { categoryFilter = e.target.value; renderProductsTab(); };
+    document.getElementById("addBtn").onclick = () => { editingId = "new"; renderProductsTab(); };
+    el.querySelectorAll(".toggle").forEach(btn => {
+      btn.onclick = async () => {
+        const p = products.find(x => x.id === btn.dataset.id);
+        const newValue = !p.inStock;
+        p.inStock = newValue; // optimistic — update the screen immediately
+        renderProductsTab();
+        const { error } = await getSupabase().from("products").update({ in_stock: newValue }).eq("id", p.id);
+        if (error){
+          p.inStock = !newValue; // roll back if the save actually failed
+          renderProductsTab();
+          showToast("Couldn't update — try again");
+        } else {
+          showToast(newValue ? "Marked in stock" : "Marked sold out");
+        }
+      };
+    });
+    el.querySelectorAll("[data-link]").forEach(btn => {
+      btn.onclick = () => {
+        const p = products.find(x => x.id === btn.dataset.link);
+        copyToClipboard(productUrl(p));
+      };
+    });
+    el.querySelectorAll("[data-edit]").forEach(btn => {
+      btn.onclick = () => { editingId = btn.dataset.edit; renderProductsTab(); };
+    });
+    el.querySelectorAll("[data-delete]").forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.dataset.delete;
+        const { error } = await getSupabase().from("products").delete().eq("id", id);
+        if (error){ showToast("Couldn't delete — try again"); return; }
+        products = products.filter(x => x.id !== id);
+        renderProductsTab();
+        showToast("Deleted");
+      };
+    });
+  }
+
+  function renderSettingsTab(){
+    const el = document.getElementById("settingsTab");
+    const swatches = ["#D4A72C","#DC2626","#EA580C","#16A34A","#0D9488","#2563EB","#7C3AED","#DB2777","#1E293B","#000000"];
+    el.innerHTML = `
+      <div class="panel">
+        <h2 style="font-family:'Fraunces', serif; font-size:19px; margin:0 0 4px;">Store Settings</h2>
+        <p style="font-size:13px; color:var(--muted); margin:0;">Customize your store's appearance and contact information</p>
+      </div>
+
+      <div class="panel">
+        <div class="row-between"><h2>Appearance</h2></div>
+        <label>Business name</label>
+        <input type="text" id="s-name" value="${settings.businessName}">
+        <label>Tagline</label>
+        <input type="text" id="s-tagline" value="${settings.tagline}">
+        <label>Logo</label>
+        <div class="file-drop" id="settingsLogoDrop" style="cursor:pointer;">
+          ${settings.logoUrl
+            ? `<img src="${settings.logoUrl}" alt="Logo" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">`
+            : "Tap to upload a logo"}
+        </div>
+        <label>Store color</label>
+        <div class="color-swatches" id="colorSwatches">
+          ${swatches.map(c => `<button type="button" class="color-swatch ${c.toLowerCase() === settings.accent.toLowerCase() ? "selected" : ""}" data-color="${c}" style="background:${c};"></button>`).join("")}
+        </div>
+        <input type="color" id="s-accent" value="${settings.accent}">
+        <button type="button" class="change-color-link" id="changeStoreColor">Change store colour</button>
+        <p style="font-size:12px; color:var(--muted); margin:6px 0 0;">This color is used for buttons and accents on your storefront.</p>
+      </div>
+
+      <div class="panel">
+        <div class="row-between"><h2>Contact Information</h2></div>
+        <label>Email address</label>
+        <input type="email" id="s-email" value="${settings.contactEmail}" placeholder="you@example.com">
+        <label>Phone number</label>
+        <input type="tel" id="s-phone" value="${settings.phone}" placeholder="0801 234 5678">
+        <label>WhatsApp number <span style="color:#a83232;">*</span></label>
+        <input type="tel" id="s-whatsapp" value="${settings.whatsapp}">
+        <p style="font-size:12px; color:var(--muted); margin:-2px 0 14px;">Required — this is where order messages are sent.</p>
+        <label>Store address</label>
+        <input type="text" id="s-address" value="${settings.address}" placeholder="Your store's physical location, if any">
+      </div>
+
+      <div class="panel">
+        <div class="row-between"><h2>Store link</h2></div>
+        <div class="link-row">
+          <span class="url">${storeUrl()}</span>
+          <button class="copy-btn ghost" id="copyStoreLinkSettings">Copy</button>
+        </div>
+        <div class="form-actions">
+          <button class="btn save" id="settingsSaveBtn" style="flex:none; padding:10px 22px;">Save all changes</button>
+        </div>
+      </div>`;
+
+    document.getElementById("copyStoreLinkSettings").onclick = () => copyToClipboard(storeUrl());
+    document.getElementById("settingsLogoDrop").onclick = () => document.getElementById("logoInput").click();
+    document.querySelectorAll(".color-swatch").forEach(sw => {
+      sw.onclick = () => {
+        document.getElementById("s-accent").value = sw.dataset.color;
+        document.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("selected"));
+        sw.classList.add("selected");
+      };
+    });
+    document.getElementById("settingsSaveBtn").onclick = async () => {
+      const btn = document.getElementById("settingsSaveBtn");
+      const newName = document.getElementById("s-name").value.trim();
+      const newTagline = document.getElementById("s-tagline").value.trim();
+      const newWhatsapp = document.getElementById("s-whatsapp").value.trim();
+      const newEmail = document.getElementById("s-email").value.trim();
+      const newPhone = document.getElementById("s-phone").value.trim();
+      const newAddress = document.getElementById("s-address").value.trim();
+      const pickedColor = document.getElementById("s-accent").value;
+      const safeAccent = applyTheme(pickedColor); // may be a slightly darker version of what was picked
+
+      btn.textContent = "Saving...";
+      btn.disabled = true;
+
+      try {
+        let logoUrl = settings.logoUrl;
+        if (formLogoFile){
+          logoUrl = await uploadPhoto(formLogoFile, "logos");
+        }
+
+        const { error } = await getSupabase().from("vendors").update({
+          business_name: newName,
+          tagline: newTagline,
+          whatsapp_number: newWhatsapp,
+          contact_email: newEmail,
+          phone_number: newPhone,
+          address: newAddress,
+          accent_color: safeAccent,
+          logo_url: logoUrl,
+        }).eq("id", currentVendorId);
+
+        if (error) throw error;
+
+        settings.businessName = newName;
+        settings.tagline = newTagline;
+        settings.whatsapp = newWhatsapp;
+        settings.contactEmail = newEmail;
+        settings.phone = newPhone;
+        settings.address = newAddress;
+        settings.accent = safeAccent;
+        settings.logoUrl = logoUrl;
+        formLogoFile = null;
+        document.querySelector(".eyebrow").textContent = settings.businessName;
+
+        showToast(pickedColor.toLowerCase() === safeAccent.toLowerCase()
+          ? "Store settings saved"
+          : "Saved — color darkened slightly to keep button text readable");
+      } catch (err) {
+        // The database itself blocks a 4th name change (see the SQL trigger) —
+        // this surfaces that as a normal message instead of a raw error.
+        showToast(err.message.includes("can only be changed 3 times")
+          ? "Store name change limit reached — can't be changed again"
+          : "Couldn't save — " + err.message);
+      } finally {
+        btn.textContent = "Save all changes";
+        btn.disabled = false;
+      }
+    };
+  }
+
+  document.querySelectorAll("nav button").forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      const tab = btn.dataset.tab;
+      document.getElementById("productsTab").style.display = tab === "products" ? "block" : "none";
+      document.getElementById("settingsTab").style.display = tab === "settings" ? "block" : "none";
+    };
+  });
+
+  function renderLogo(){
+    const slot = document.getElementById("logoSlot");
+    slot.innerHTML = settings.logoUrl ? `<img src="${settings.logoUrl}" alt="Logo">` : "+ Logo";
+  }
+
+  document.getElementById("logoSlot").onclick = () => document.getElementById("logoInput").click();
+  let formLogoFile = null;
+  document.getElementById("logoInput").onchange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    formLogoFile = file;
+    const reader = new FileReader();
+    reader.onload = () => {
+      settings.logoUrl = reader.result; // local preview only, until Settings Save actually uploads it
+      renderLogo();
+      if (document.getElementById("settingsTab").style.display !== "none") renderSettingsTab();
+      showToast("Logo ready — hit Save in Store Settings to keep it");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // ─── LOGIN ─────────────────────────────────────────────────────
+
+  async function checkLogin(){
+    const { data: { session } } = await getSupabase().auth.getSession();
+
+    if (!session){
+      document.getElementById("loginGate").style.display = "block";
+      document.getElementById("dashboardContent").style.display = "none";
+      return;
+    }
+
+    currentVendorId = session.user.id;
+
+    try {
+      await loadVendorData();
+    } catch (err) {
+      document.getElementById("login-error").textContent = err.message;
+      document.getElementById("login-error").classList.add("show");
+      document.getElementById("loginGate").style.display = "block";
+      document.getElementById("dashboardContent").style.display = "none";
+      await getSupabase().auth.signOut(); // don't leave them "logged in" with no store to manage
+      return;
+    }
+
+    document.getElementById("loginGate").style.display = "none";
+    document.getElementById("dashboardContent").style.display = "block";
+    document.querySelector(".eyebrow").textContent = settings.businessName || "Your store";
+    renderProductsTab();
+    renderSettingsTab();
+    renderLogo();
+    applyTheme(settings.accent);
+  }
+
+  // ─── LOGIN / SIGNUP TOGGLE ─────────────────────────────────────
+
+  function showLoginForm(){
+    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("signupForm").style.display = "none";
+  }
+  function showSignupForm(){
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("signupForm").style.display = "block";
+  }
+  document.getElementById("showSignup").onclick = showSignupForm;
+  document.getElementById("showLogin").onclick = showLoginForm;
+
+  // Landing on /signup opens straight to the signup form; /dashboard opens to login.
+  if (window.location.pathname.replace(/\/$/, "") === "/signup") showSignupForm();
+
+  // Auto-fill the store link from the business name, unless they've edited it themselves.
+  let slugTouchedByUser = false;
+  document.getElementById("signup-slug").addEventListener("input", () => { slugTouchedByUser = true; });
+  document.getElementById("signup-name").addEventListener("input", (e) => {
+    if (!slugTouchedByUser){
+      document.getElementById("signup-slug").value = slugify(e.target.value);
+    }
+  });
+
+  document.getElementById("login-btn").onclick = async () => {
+    const email = document.getElementById("login-email").value.trim();
+    const password = document.getElementById("login-password").value;
+    const errorEl = document.getElementById("login-error");
+    const btn = document.getElementById("login-btn");
+
+    btn.textContent = "Logging in...";
+    btn.disabled = true;
+
+    try {
+      const { error } = await getSupabase().auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      errorEl.textContent = "";
+      errorEl.classList.remove("show");
+      await checkLogin();
+    } catch (err) {
+      console.error("Veacasy login error:", err);
+      errorEl.textContent = err.message || "Login failed. Please try again.";
+      errorEl.classList.add("show");
+    } finally {
+      btn.textContent = "Log in";
+      btn.disabled = false;
+    }
+  };
+
+  document.getElementById("signup-btn").onclick = async () => {
+    const businessName = document.getElementById("signup-name").value.trim();
+    const slug = document.getElementById("signup-slug").value.trim();
+    const whatsapp = document.getElementById("signup-whatsapp").value.trim();
+    const email = document.getElementById("signup-email").value.trim();
+    const password = document.getElementById("signup-password").value;
+    const inviteCode = document.getElementById("signup-invite").value.trim();
+    const errorEl = document.getElementById("signup-error");
+    const btn = document.getElementById("signup-btn");
+
+    errorEl.textContent = "";
+    errorEl.classList.remove("show");
+
+    if (!businessName || !slug || !whatsapp || !email || !password || !inviteCode){
+      errorEl.textContent = "Please fill in every field.";
+      errorEl.classList.add("show");
+      return;
+    }
+
+    btn.textContent = "Checking invite code...";
+    btn.disabled = true;
+
+    // Check the invite code through a SECURITY DEFINER RPC.
+    // We do NOT read invite_codes directly as an anonymous user because RLS
+    // should not expose the full invite-code table to the public internet.
+    const { data: inviteValid, error: codeErr } = await getSupabase()
+      .rpc("check_invite_code", { p_code: inviteCode });
+
+    if (codeErr || inviteValid !== true){
+      console.error("Invite-code check failed:", codeErr);
+      errorEl.textContent = codeErr
+        ? "We couldn't verify that invite code right now. Please try again."
+        : "That invite code isn't valid or has already been used.";
+      errorEl.classList.add("show");
+      btn.textContent = "Create store";
+      btn.disabled = false;
+      return;
+    }
+
+    btn.textContent = "Creating store...";
+
+    // Step 1 — create the actual login.
+    const { data, error: signUpErr } = await getSupabase().auth.signUp({ email, password });
+
+    if (signUpErr){
+      errorEl.textContent = signUpErr.message;
+      errorEl.classList.add("show");
+      btn.textContent = "Create store";
+      btn.disabled = false;
+      return;
+    }
+
+    // If email confirmation is required in Supabase's Auth settings, there's no
+    // session yet — the vendor row can't be created until they confirm and log
+    // in, since RLS only allows inserting a row that matches your own logged-in id.
+    if (!data.session){
+      errorEl.textContent = "";
+      showLoginForm();
+      document.getElementById("login-error").textContent = "Account created — check your email to confirm it, then log in.";
+      document.getElementById("login-error").classList.add("show");
+      btn.textContent = "Create store";
+      btn.disabled = false;
+      return;
+    }
+
+    // Step 2 — create their store row, explicitly on brand blue by default.
+    const { error: insertErr } = await getSupabase().from("vendors").insert({
+      id: data.user.id,
+      business_name: businessName,
+      whatsapp_number: whatsapp,
+      slug: slug,
+      accent_color: "#2196F3",
+    });
+
+    btn.textContent = "Create store";
+    btn.disabled = false;
+
+    if (insertErr){
+      errorEl.textContent = insertErr.message.includes("duplicate") || insertErr.message.includes("already exists")
+        ? "That store link is already taken — try editing it above."
+        : "Couldn't create your store — " + insertErr.message;
+      errorEl.classList.add("show");
+      return; // their login now exists but has no store yet — they can retry signup with a different slug
+    }
+
+    // Atomically consume the code for the currently authenticated user.
+    // The RPC re-checks that it is still unused, so two people cannot claim it.
+    const { data: consumed, error: consumeErr } = await getSupabase()
+      .rpc("consume_invite_code", { p_code: inviteCode });
+
+    if (consumeErr || consumed !== true){
+      console.error("Invite-code consume failed:", consumeErr);
+      errorEl.textContent = "Your store was created, but the invite code could not be finalized. Please contact support before trying this code again.";
+      errorEl.classList.add("show");
+      return;
+    }
+
+    currentVendorId = data.user.id;
+    await checkLogin(); // loads their brand-new store straight into the dashboard
+  };
+
+  document.getElementById("logoutBtn").onclick = async () => {
+    await getSupabase().auth.signOut();
+    currentVendorId = null;
+    document.getElementById("login-email").value = "";
+    document.getElementById("login-password").value = "";
+    showLoginForm();
+    checkLogin();
+  };
+
+  checkLogin().catch((err) => {
+    console.error("Veacasy startup error:", err);
+    const errorEl = document.getElementById("login-error");
+    if (errorEl) {
+      errorEl.textContent = err.message || "Veacasy could not connect. Please refresh the page.";
+      errorEl.classList.add("show");
+    }
+  });
+</script>
+
+</body>
+</html>
