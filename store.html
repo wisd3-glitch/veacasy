@@ -32,9 +32,10 @@ h1{font:600 clamp(25px,4vw,34px)/1.1 'Fraunces',Georgia,serif;margin:0}
 .product-card{min-width:0;background:var(--panel);border:1px solid #eceef1;border-radius:16px;overflow:hidden;box-shadow:0 5px 18px rgba(18,32,56,.06);display:flex;flex-direction:column}
 .product-link{cursor:pointer;text-decoration:none;color:inherit}
 .product-link:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
-.photo-link{display:block;width:100%;border:0;padding:0;background:#eef0f3;aspect-ratio:1.08/1;overflow:hidden;cursor:pointer}
+.photo-link{position:relative;display:block;width:100%;border:0;padding:0;background:#eef0f3;aspect-ratio:1.08/1;overflow:hidden;cursor:pointer}
 .photo{width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#e9edf3;color:var(--accent);font:34px 'Fraunces',serif}
 .photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-count{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:11px;font-weight:600;padding:3px 8px;border-radius:999px;pointer-events:none}
 .details{padding:13px 13px 14px;display:flex;flex-direction:column;align-items:stretch;flex:1;min-width:0}
 .name{font-size:15px;font-weight:600;line-height:1.35;margin:0 0 6px;cursor:pointer}
 .price{font-size:17px;font-weight:700;color:var(--accent);margin:0 0 7px}
@@ -90,6 +91,7 @@ function applyTheme(hex){
   root.setProperty("--ink",neutral?"#202020":hslToHex(h,22,14));
 }
 function getSlug(){const parts=location.pathname.split("/").filter(Boolean);return parts.length?decodeURIComponent(parts[parts.length-1]):"";}
+function getImages(p){const a=Array.isArray(p.photo_urls)?p.photo_urls.filter(Boolean):[];return a.length?a:(p.photo_url?[p.photo_url]:[]);}
 function whatsappUrl(p){
   const n=String(vendor.whatsapp_number||"").replace(/\D/g,"");if(!n)return"#";
   const text=`Hi ${vendor.business_name||"there"}, I'm interested in ${p.name}${p.price!=null?" ("+money(p.price)+")":""}.`;
@@ -105,7 +107,7 @@ function render(){
   <div class="search-panel"><input class="search" id="search" type="search" aria-label="Search products" placeholder="Search products…" value="${escapeHtml(searchTerm)}"></div>
   ${cats.length>1?`<nav class="categories" aria-label="Product categories">${cats.map(c=>`<button type="button" class="cat ${c===activeCategory?"active":""}" data-cat="${escapeHtml(c)}">${escapeHtml(c==="All"?"All Products":c)}</button>`).join("")}</nav>`:""}
   <div id="products" class="product-grid">${visible.length?visible.map(p=>`<article class="product-card" data-product-code="${escapeHtml(p.code||"")}" tabindex="0" role="link" aria-label="View ${escapeHtml(p.name)}">
-    <button type="button" class="photo-link" data-open-product="${escapeHtml(p.code||"")}" aria-label="View ${escapeHtml(p.name)}"><div class="photo">${p.photo_url?`<img src="${escapeHtml(p.photo_url)}" alt="${escapeHtml(p.name)}" loading="lazy">`:initials(p.name)}</div></button>
+    <button type="button" class="photo-link" data-open-product="${escapeHtml(p.code||"")}" aria-label="View ${escapeHtml(p.name)}"><div class="photo">${getImages(p)[0]?`<img src="${escapeHtml(getImages(p)[0])}" alt="${escapeHtml(p.name)}" loading="lazy">`:initials(p.name)}</div>${getImages(p).length>1?`<span class="photo-count">1/${getImages(p).length}</span>`:""}</button>
     <div class="details"><p class="name" data-open-product="${escapeHtml(p.code||"")}">${escapeHtml(p.name)}</p><p class="price">${money(p.price)}</p>${p.category?`<p class="category">${escapeHtml(p.category)}</p>`:""}${p.description?`<p class="description">${escapeHtml(p.description)}</p>`:""}<p class="stock ${p.in_stock?"":"out"}">${p.in_stock?"In Stock":"Currently unavailable"}</p>${p.in_stock?`<a class="order" href="${whatsappUrl(p)}" target="_blank" rel="noopener">${waIcon}<span>Order on WhatsApp</span></a>`:`<div class="sold">Currently unavailable</div>`}</div></article>`).join(""):`<div class="empty">No products found. Try another search or category.</div>`}</div>
   <div class="footer">${vendor.contact_email?`<div>${escapeHtml(vendor.contact_email)}</div>`:""}${vendor.phone_number?`<div>${escapeHtml(vendor.phone_number)}</div>`:""}${vendor.address?`<div>${escapeHtml(vendor.address)}</div>`:""}<div style="margin-top:10px">Powered by <a href="https://${DOMAIN}/">VEACASY</a></div></div>`;
   const search=document.getElementById("search");
@@ -122,7 +124,10 @@ async function loadStore(){
     const slug=getSlug();if(!slug)throw new Error("Store link not found.");
     const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url").eq("slug",slug).single();
     if(ve||!v)throw new Error("Store not found.");vendor=v;
-    const{data:rows,error:pe}=await getSupabase().from("products").select("id,code,name,price,category,description,in_stock,photo_url").eq("vendor_id",v.id);
+    const baseCols="id,code,name,price,category,description,in_stock,photo_url";
+    let res=await getSupabase().from("products").select(baseCols+",photo_urls").eq("vendor_id",v.id);
+    if(res.error&&/photo_urls/i.test(res.error.message||""))res=await getSupabase().from("products").select(baseCols).eq("vendor_id",v.id);
+    const{data:rows,error:pe}=res;
     if(pe)throw pe;products=rows||[];const requestedCategory=getInitialCategory();activeCategory=(requestedCategory==="All"||products.some(p=>(p.category||"")===requestedCategory))?requestedCategory:"All";applyTheme(v.accent_color||"#2196F3");document.title=`${v.business_name||"Store"} — VEACASY`;render();
   }catch(err){app.className="error";app.innerHTML=`<h2>Store unavailable</h2><p>${escapeHtml(err.message||"This store could not be loaded.")}</p>`;}
 }
