@@ -69,14 +69,23 @@ function initGallery(){
 }
 function params(){const q=new URLSearchParams(location.search);let parts=location.pathname.split("/").filter(Boolean);return{slug:q.get("slug")||decodeURIComponent(parts[0]||""),code:q.get("code")||decodeURIComponent(parts[1]||"")};}
 function whatsappUrl(){const n=String(vendor.whatsapp_number||"").replace(/\D/g,"");if(!n)return"#";const text=`Hi ${vendor.business_name||"there"}, I'm interested in ${product.name}${product.price!=null?" ("+money(product.price)+")":""}.`;return`https://wa.me/${n}?text=${encodeURIComponent(text)}`;}
+function vendorIsActive(v){
+  if(!v)return false;
+  if(v.status&&v.status!=="active")return false;
+  const now=Date.now();
+  if(v.plan==="trial"&&v.trial_ends_at&&new Date(v.trial_ends_at).getTime()<=now)return false;
+  if(v.expires_at&&new Date(v.expires_at).getTime()<=now)return false;
+  return true;
+}
 async function loadProduct(){
   const app=document.getElementById("app");
   try{
     const{slug,code}=params();
     if(!slug||!code)throw new Error("Product link not found.");
-    const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url").eq("slug",slug).single();
+    const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url,plan,status,trial_ends_at,expires_at").eq("slug",slug).single();
     if(ve||!v)throw new Error("Store not found.");
     vendor=v;
+    if(!vendorIsActive(v)){document.title=`${v.business_name||"Store"} — VEACASY`;app.className="error";app.innerHTML=`<h2>Temporarily unavailable</h2><p>${escapeHtml(v.business_name||"This store")} is temporarily unavailable. Please check back soon.</p><p style="margin-top:18px;font-size:12.5px"><a href="/dashboard/">Store owner? Log in</a></p>`;return;}
     const pBase="id,code,name,price,category,description,in_stock,photo_url";
     let multi=true;
     let pres=await getSupabase().from("products").select(pBase+",photo_urls").eq("vendor_id",v.id).eq("code",code).single();

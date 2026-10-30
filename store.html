@@ -116,12 +116,21 @@ function render(){
   document.querySelectorAll(".product-card").forEach(card=>{card.addEventListener("click",e=>{if(e.target.closest("a,button"))return;openProduct(card.dataset.productCode);});card.addEventListener("keydown",e=>{if(e.target===card&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openProduct(card.dataset.productCode);}});});
   const hash=location.hash.replace("#","");if(hash){const t=document.getElementById(hash);if(t)setTimeout(()=>t.scrollIntoView({behavior:"smooth",block:"center"}),50);}
 }
+function vendorIsActive(v){
+  if(!v)return false;
+  if(v.status&&v.status!=="active")return false;
+  const now=Date.now();
+  if(v.plan==="trial"&&v.trial_ends_at&&new Date(v.trial_ends_at).getTime()<=now)return false;
+  if(v.expires_at&&new Date(v.expires_at).getTime()<=now)return false;
+  return true;
+}
 async function loadStore(){
   const app=document.getElementById("app");
   try{
     const slug=getSlug();if(!slug)throw new Error("Store link not found.");
-    const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url").eq("slug",slug).single();
+    const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url,plan,status,trial_ends_at,expires_at").eq("slug",slug).single();
     if(ve||!v)throw new Error("Store not found.");vendor=v;
+    if(!vendorIsActive(v)){document.title=`${v.business_name||"Store"} — VEACASY`;app.className="error";app.innerHTML=`<h2>Temporarily unavailable</h2><p>${escapeHtml(v.business_name||"This store")} is temporarily unavailable. Please check back soon.</p><p style="margin-top:18px;font-size:12.5px"><a href="/dashboard/">Store owner? Log in</a></p>`;return;}
     const baseCols="id,code,name,price,category,description,in_stock,photo_url";
     let res=await getSupabase().from("products").select(baseCols+",photo_urls").eq("vendor_id",v.id);
     if(res.error&&/photo_urls/i.test(res.error.message||""))res=await getSupabase().from("products").select(baseCols).eq("vendor_id",v.id);

@@ -105,6 +105,13 @@
     margin:0;
     font-weight:600;
   }
+  #planBanner:empty{ display:none; }
+  .plan-banner{ margin:0 0 14px; padding:12px 14px; border-radius:12px; font-size:13.5px; line-height:1.45; background:var(--panel); border:1px solid var(--line); color:var(--ink); }
+  .plan-banner strong{ display:block; font-size:14.5px; margin-bottom:2px; }
+  .plan-banner p{ margin:4px 0 0; color:var(--muted); }
+  .plan-banner.warn{ background:#FFF7E6; border-color:#F2D48B; }
+  .plan-banner.expired{ background:#FDECEC; border-color:#F1B4B4; }
+  .plan-btn{ display:inline-block; margin-top:10px; padding:9px 14px; border-radius:999px; background:var(--accent); color:#fff; font-weight:600; font-size:13px; text-decoration:none; }
   .add-btn{
     background:var(--accent);
     color:var(--panel);
@@ -558,10 +565,7 @@
         <label for="signup-password">Password</label>
         <input type="password" id="signup-password" placeholder="At least 6 characters">
       </div>
-      <div class="login-field">
-        <label for="signup-invite">Invite code</label>
-        <input type="tel" id="signup-invite" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6-digit code">
-      </div>
+      <p style="font-size:12.5px;color:#5f6b7a;margin:2px 0 12px;">Free 14-day trial with up to 20 products. No code needed.</p>
       <button class="login-btn" id="signup-btn">Create store</button>
       <p class="login-switch">Already have a store? <button id="showLogin">Log in</button></p>
     </div>
@@ -578,6 +582,8 @@
     </div>
     <input type="file" id="logoInput" accept="image/*" style="display:none;">
   </header>
+
+  <div id="planBanner"></div>
 
   <nav>
     <button class="active" data-tab="products">Products</button>
@@ -649,7 +655,19 @@
       slug: vendor.slug || "",
       accent: vendor.accent_color || "#2196F3",
       logoUrl: vendor.logo_url,
+      plan: vendor.plan || "basic",
+      status: vendor.status || "active",
+      trialEndsAt: vendor.trial_ends_at || null,
+      expiresAt: vendor.expires_at || null,
+      productLimit: vendor.product_limit || 0,
+      productCount: 0,
     };
+
+    const { count: totalCount } = await getSupabase()
+      .from("products")
+      .select("id", { count: "exact", head: true })
+      .eq("vendor_id", currentVendorId);
+    settings.productCount = totalCount || 0;
 
     const { data: categoryRows, error: categoryError } = await getSupabase()
       .from("products")
@@ -662,6 +680,80 @@
     // Load only the current dashboard page. This keeps the dashboard fast even
     // when a vendor has more than Supabase's default 1,000-row response size.
     await loadDashboardProducts();
+    renderPlanBanner();
+  }
+
+  // ─── PLAN STATUS (trial / expiry) ───────────────────────────────
+  const VEACASY_WHATSAPP = "2347026438309";
+
+  function planIsActive(){
+    if (settings.status && settings.status !== "active") return false;
+    const now = Date.now();
+    if (settings.plan === "trial" && settings.trialEndsAt && new Date(settings.trialEndsAt).getTime() <= now) return false;
+    if (settings.expiresAt && new Date(settings.expiresAt).getTime() <= now) return false;
+    return true;
+  }
+
+  function planEndDate(){
+    if (settings.plan === "trial") return settings.trialEndsAt ? new Date(settings.trialEndsAt) : null;
+    return settings.expiresAt ? new Date(settings.expiresAt) : null;
+  }
+
+  function upgradeLink(){
+    const text = `Hi VEACASY, I'd like to upgrade my store (${DOMAIN}/${settings.slug}/). Please send me the plans and payment details.`;
+    return `https://wa.me/${VEACASY_WHATSAPP}?text=${encodeURIComponent(text)}`;
+  }
+
+  function renderPlanBanner(){
+    renderPlanBannerInner();
+    const el = document.getElementById("planBanner");
+    if (!el) return;
+    el.insertAdjacentHTML("beforeend", `<details style="margin:0 0 14px;font-size:13px;"><summary style="cursor:pointer;color:var(--muted);">Have an upgrade code?</summary><div style="display:flex;gap:8px;margin-top:8px;"><input id="redeemInput" placeholder="e.g. BAS-1A2B-3C4D" style="flex:1;min-width:0;padding:9px;border:1px solid var(--line);border-radius:9px;text-transform:uppercase;"><button class="plan-btn" id="redeemBtn" style="margin:0;border:0;cursor:pointer;">Apply</button></div></details>`);
+    document.getElementById("redeemBtn").onclick = async () => {
+      const code = document.getElementById("redeemInput").value.trim();
+      if (!code) return;
+      const { error } = await getSupabase().rpc("redeem_code", { p_code: code });
+      if (error){ showToast(error.message); return; }
+      showToast("Plan upgraded");
+      await loadVendorData();
+    };
+  }
+
+  function renderPlanBannerInner(){
+    const el = document.getElementById("planBanner");
+    if (!el) return;
+    const isTrial = settings.plan === "trial";
+    const end = planEndDate();
+    const daysLeft = end ? Math.max(0, Math.ceil((end.getTime() - Date.now()) / 86400000)) : null;
+    const usage = settings.productLimit ? `${settings.productCount} of ${settings.productLimit} products used` : "";
+
+    if (!planIsActive()){
+      el.innerHTML = `<div class="plan-banner expired">
+        <strong>${settings.status === "suspended" ? "Your store is suspended" : isTrial ? "Your free trial has ended" : "Your plan has expired"}</strong>
+        <p>Customers now see "temporarily unavailable" on your store and product pages. Upgrade to bring your store back online. Your products are saved and nothing is lost.</p>
+        <a class="plan-btn" href="${upgradeLink()}" target="_blank" rel="noopener">Upgrade on WhatsApp</a>
+      </div>`;
+      return;
+    }
+    if (isTrial){
+      const warn = daysLeft !== null && daysLeft <= 3;
+      el.innerHTML = `<div class="plan-banner ${warn ? "warn" : ""}">
+        <strong>Free trial: ${daysLeft === null ? "active" : daysLeft + (daysLeft === 1 ? " day left" : " days left")}</strong>
+        <span>${usage}</span>
+        <p>Upgrade before your trial ends to keep your store online.</p>
+        <a class="plan-btn" href="${upgradeLink()}" target="_blank" rel="noopener">Upgrade on WhatsApp</a>
+      </div>`;
+      return;
+    }
+    if (daysLeft !== null && daysLeft <= 14){
+      el.innerHTML = `<div class="plan-banner warn">
+        <strong>Your plan ends in ${daysLeft} ${daysLeft === 1 ? "day" : "days"}</strong>
+        <p>Renew to keep your store online.</p>
+        <a class="plan-btn" href="${upgradeLink()}" target="_blank" rel="noopener">Renew on WhatsApp</a>
+      </div>`;
+      return;
+    }
+    el.innerHTML = "";
   }
 
   async function loadDashboardProducts(){
@@ -1091,7 +1183,11 @@
         try { await loadDashboardProducts(); renderProductsTab(); } catch (err) { showToast("Couldn't load products — try again"); }
       };
     });
-    document.getElementById("addBtn").onclick = () => { editingId = "new"; renderProductsTab(); };
+    document.getElementById("addBtn").onclick = () => {
+      if (!planIsActive()){ showToast("Your plan has ended. Upgrade to add products."); return; }
+      if (settings.productLimit && settings.productCount >= settings.productLimit){ showToast(`Product limit reached (${settings.productLimit}). Upgrade to add more.`); return; }
+      editingId = "new"; renderProductsTab();
+    };
     el.querySelectorAll(".toggle").forEach(btn => {
       btn.onclick = async () => {
         const p = products.find(x => x.id === btn.dataset.id);
@@ -1122,6 +1218,8 @@
         const id = btn.dataset.delete;
         const { error } = await getSupabase().from("products").delete().eq("id", id);
         if (error){ showToast("Couldn't delete — try again"); return; }
+        settings.productCount = Math.max(0, (settings.productCount || 0) - 1);
+        renderPlanBanner();
         if (products.length === 1 && dashboardPage > 1) dashboardPage -= 1;
         try { await loadDashboardProducts(); renderProductsTab(); } catch (err) { showToast("Couldn't reload products — try again"); return; }
         showToast("Deleted");
@@ -1421,43 +1519,29 @@
     const whatsapp = document.getElementById("signup-whatsapp").value.trim();
     const email = document.getElementById("signup-email").value.trim();
     const password = document.getElementById("signup-password").value;
-    const inviteCode = document.getElementById("signup-invite").value.trim();
     const errorEl = document.getElementById("signup-error");
     const btn = document.getElementById("signup-btn");
 
     errorEl.textContent = "";
     errorEl.classList.remove("show");
 
-    if (!businessName || !slug || !whatsapp || !email || !password || !inviteCode){
+    if (!businessName || !slug || !whatsapp || !email || !password){
       errorEl.textContent = "Please fill in every field.";
       errorEl.classList.add("show");
-      return;
-    }
-
-    btn.textContent = "Checking invite code...";
-    btn.disabled = true;
-
-    // Check the invite code through a SECURITY DEFINER RPC.
-    // We do NOT read invite_codes directly as an anonymous user because RLS
-    // should not expose the full invite-code table to the public internet.
-    const { data: inviteValid, error: codeErr } = await getSupabase()
-      .rpc("check_invite_code", { p_code: inviteCode });
-
-    if (codeErr || inviteValid !== true){
-      console.error("Invite-code check failed:", codeErr);
-      errorEl.textContent = codeErr
-        ? "We couldn't verify that invite code right now. Please try again."
-        : "That invite code isn't valid or has already been used.";
-      errorEl.classList.add("show");
-      btn.textContent = "Create store";
-      btn.disabled = false;
       return;
     }
 
     btn.textContent = "Creating store...";
 
     // Step 1 — create the actual login.
-    const { data, error: signUpErr } = await getSupabase().auth.signUp({ email, password });
+    // (If an earlier attempt already created this login, reuse it instead of failing.)
+    let data, signUpErr = null;
+    const { data: { session: existingSession } } = await getSupabase().auth.getSession();
+    if (existingSession && existingSession.user && (existingSession.user.email || "").toLowerCase() === email.toLowerCase()){
+      data = { user: existingSession.user, session: existingSession };
+    } else {
+      ({ data, error: signUpErr } = await getSupabase().auth.signUp({ email, password }));
+    }
 
     if (signUpErr){
       errorEl.textContent = signUpErr.message;
@@ -1480,36 +1564,23 @@
       return;
     }
 
-    // Step 2 — create their store row, explicitly on brand blue by default.
-    const { error: insertErr } = await getSupabase().from("vendors").insert({
-      id: data.user.id,
-      business_name: businessName,
-      whatsapp_number: whatsapp,
-      slug: slug,
-      accent_color: "#2196F3",
+    // Step 2 — create the store through one database function. It checks the
+    // invite code, creates the store on a 14-day free trial (20 products) and
+    // uses up the code, all in one step, so a store can't exist without a valid code.
+    const { error: storeErr } = await getSupabase().rpc("create_store", {
+      p_business_name: businessName,
+      p_slug: slug,
+      p_whatsapp: whatsapp,
     });
 
     btn.textContent = "Create store";
     btn.disabled = false;
 
-    if (insertErr){
-      errorEl.textContent = insertErr.message.includes("duplicate") || insertErr.message.includes("already exists")
-        ? "That store link is already taken — try editing it above."
-        : "Couldn't create your store — " + insertErr.message;
+    if (storeErr){
+      console.error("create_store failed:", storeErr);
+      errorEl.textContent = storeErr.message || "Couldn't create your store. Please try again.";
       errorEl.classList.add("show");
-      return; // their login now exists but has no store yet — they can retry signup with a different slug
-    }
-
-    // Atomically consume the code for the currently authenticated user.
-    // The RPC re-checks that it is still unused, so two people cannot claim it.
-    const { data: consumed, error: consumeErr } = await getSupabase()
-      .rpc("consume_invite_code", { p_code: inviteCode });
-
-    if (consumeErr || consumed !== true){
-      console.error("Invite-code consume failed:", consumeErr);
-      errorEl.textContent = "Your store was created, but the invite code could not be finalized. Please contact support before trying this code again.";
-      errorEl.classList.add("show");
-      return;
+      return; // the login exists but has no store yet: retrying with the same email now works
     }
 
     currentVendorId = data.user.id;
