@@ -106,6 +106,7 @@
     font-weight:600;
   }
   #planBanner:empty{ display:none; }
+  .login-field select{ width:100%; padding:12px; border:1px solid #dde3ea; border-radius:12px; font:inherit; background:#f4f8fc; color:inherit; }
   .acct{ margin-left:auto; position:relative; }
   .acct-btn{ width:42px; height:42px; border-radius:50%; border:0; background:var(--accent); color:#fff; font-weight:700; font-size:16px; cursor:pointer; }
   .acct-menu{ display:none; position:absolute; right:0; top:50px; min-width:210px; max-width:260px; background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:12px; box-shadow:0 8px 24px rgba(0,0,0,.14); z-index:20; }
@@ -565,6 +566,10 @@
         <input type="tel" id="signup-whatsapp" placeholder="2348012345678">
       </div>
       <div class="login-field">
+        <label for="signup-currency">Store currency</label>
+        <select id="signup-currency"><option value="NGN">Nigerian Naira (₦)</option><option value="USD">US Dollar ($)</option><option value="GBP">British Pound (£)</option><option value="EUR">Euro (€)</option><option value="GHS">Ghanaian Cedi</option><option value="KES">Kenyan Shilling</option><option value="ZAR">South African Rand</option><option value="CAD">Canadian Dollar</option><option value="AUD">Australian Dollar</option><option value="INR">Indian Rupee</option><option value="AED">UAE Dirham</option><option value="XOF">West African CFA franc</option></select>
+      </div>
+      <div class="login-field">
         <label for="signup-email">Email</label>
         <input type="email" id="signup-email" placeholder="you@example.com">
       </div>
@@ -660,6 +665,7 @@
       slug: vendor.slug || "",
       accent: vendor.accent_color || "#2196F3",
       logoUrl: vendor.logo_url,
+      currency: vendor.currency || "NGN",
       plan: vendor.plan || "basic",
       status: vendor.status || "active",
       trialEndsAt: vendor.trial_ends_at || null,
@@ -908,7 +914,10 @@
     setTimeout(() => t.classList.remove("show"), 1400);
   }
 
-  function money(n){ return "₦" + Number(n).toLocaleString(); }
+  function fmtMoney(n,cur){const v=Number(n||0),d=Number.isInteger(v)?0:2;try{return new Intl.NumberFormat("en",{style:"currency",currency:cur||"NGN",currencyDisplay:"narrowSymbol",minimumFractionDigits:d,maximumFractionDigits:d}).format(v)}catch(e){return (cur||"NGN")+" "+v.toLocaleString()}}
+  const CURRENCIES = [["NGN", "Nigerian Naira (₦)"], ["USD", "US Dollar ($)"], ["GBP", "British Pound (£)"], ["EUR", "Euro (€)"], ["GHS", "Ghanaian Cedi"], ["KES", "Kenyan Shilling"], ["ZAR", "South African Rand"], ["CAD", "Canadian Dollar"], ["AUD", "Australian Dollar"], ["INR", "Indian Rupee"], ["AED", "UAE Dirham"], ["XOF", "West African CFA franc"]];
+  function currencyOptions(sel){ return CURRENCIES.map(([c,n]) => `<option value="${c}"${c === sel ? " selected" : ""}>${n}</option>`).join(""); }
+  function money(n){ return fmtMoney(n, settings.currency); }
   function initials(name){ return name.trim().charAt(0); }
 
   function hexToHsl(hex){
@@ -993,7 +1002,7 @@
           <input type="file" id="productPhotoInput" accept="image/*" multiple style="display:none;">
           <label>Name</label>
           <input type="text" id="f-name" value="${p.name}">
-          <label>Price (₦)</label>
+          <label>Price (${settings.currency || "NGN"})</label>
           <input type="number" id="f-price" value="${p.price}">
           <label>Category</label>
           <input type="text" id="f-category" value="${p.category}" placeholder="e.g. Wigs">
@@ -1250,6 +1259,9 @@
         <input type="text" id="s-name" value="${settings.businessName}">
         <label>Tagline</label>
         <input type="text" id="s-tagline" value="${settings.tagline}">
+        <label>Store currency</label>
+        <select id="s-currency">${currencyOptions(settings.currency)}</select>
+        <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0;">Customers see prices in this currency. Changing it does not convert your prices, so update your product prices after switching.</p>
         <label>Logo</label>
         <div class="file-drop" id="settingsLogoDrop" style="cursor:pointer;">
           ${settings.logoUrl
@@ -1301,6 +1313,7 @@
       const btn = document.getElementById("settingsSaveBtn");
       const newName = document.getElementById("s-name").value.trim();
       const newTagline = document.getElementById("s-tagline").value.trim();
+      const newCurrency = document.getElementById("s-currency").value;
       const newWhatsapp = document.getElementById("s-whatsapp").value.trim();
       const newEmail = document.getElementById("s-email").value.trim();
       const newPhone = document.getElementById("s-phone").value.trim();
@@ -1320,6 +1333,7 @@
         const { error } = await getSupabase().from("vendors").update({
           business_name: newName,
           tagline: newTagline,
+          currency: newCurrency,
           whatsapp_number: newWhatsapp,
           contact_email: newEmail,
           phone_number: newPhone,
@@ -1332,6 +1346,7 @@
 
         settings.businessName = newName;
         settings.tagline = newTagline;
+        settings.currency = newCurrency;
         settings.whatsapp = newWhatsapp;
         settings.contactEmail = newEmail;
         settings.phone = newPhone;
@@ -1606,6 +1621,8 @@
       errorEl.classList.add("show");
       return; // the login exists but has no store yet: retrying with the same email now works
     }
+
+    try { await getSupabase().from("vendors").update({ currency: document.getElementById("signup-currency").value }).eq("id", data.user.id); } catch (e) {}
 
     currentVendorId = data.user.id;
     await checkLogin(); // loads their brand-new store straight into the dashboard

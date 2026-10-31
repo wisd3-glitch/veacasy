@@ -71,7 +71,8 @@ function getSupabase(){
   return client;
 }
 function escapeHtml(v){return String(v??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));}
-function money(v){return "₦"+Number(v||0).toLocaleString();}
+function fmtMoney(n,cur){const v=Number(n||0),d=Number.isInteger(v)?0:2;try{return new Intl.NumberFormat("en",{style:"currency",currency:cur||"NGN",currencyDisplay:"narrowSymbol",minimumFractionDigits:d,maximumFractionDigits:d}).format(v)}catch(e){return (cur||"NGN")+" "+v.toLocaleString()}}
+function money(v){return fmtMoney(v,(typeof vendor!=="undefined"&&vendor?vendor.currency:null));}
 function initials(n){return escapeHtml((n||"?").trim().charAt(0).toUpperCase());}
 function hexToHsl(hex){
   hex=String(hex||"#2196F3").replace("#","");if(hex.length===3)hex=hex.split("").map(c=>c+c).join("");
@@ -128,7 +129,7 @@ async function loadStore(){
   const app=document.getElementById("app");
   try{
     const slug=getSlug();if(!slug)throw new Error("Store link not found.");
-    const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url,plan,status,trial_ends_at,expires_at").eq("slug",slug).single();
+    const{data:v,error:ve}=await getSupabase().from("vendors").select("id,business_name,tagline,whatsapp_number,contact_email,phone_number,address,slug,accent_color,logo_url,plan,status,trial_ends_at,expires_at,currency").eq("slug",slug).single();
     if(ve||!v)throw new Error("Store not found.");vendor=v;
     if(!vendorIsActive(v)){document.title=`${v.business_name||"Store"} — VEACASY`;app.className="error";app.innerHTML=`<h2>Temporarily unavailable</h2><p>${escapeHtml(v.business_name||"This store")} is temporarily unavailable. Please check back soon.</p><p style="margin-top:18px;font-size:12.5px"><a href="/dashboard/">Store owner? Log in</a></p>`;return;}
     const baseCols="id,code,name,price,category,description,in_stock,photo_url";
