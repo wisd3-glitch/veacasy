@@ -28,6 +28,7 @@ button{cursor:pointer;background:var(--blue);color:#fff;border:0;font-weight:600
 <div class="bar"><select id="cp"><option value="basic">Basic</option><option value="ceo">CEO</option><option value="custom">Custom</option></select><input id="cd" type="number" value="365" placeholder="Days"><input id="cn" type="number" value="1" min="1" max="50"><button id="cg">Create</button></div>
 <textarea id="cout" readonly placeholder="New codes appear here. Copy and send them on WhatsApp."></textarea>
 <h2>Recent codes</h2><div id="codes"></div>
+<h2>Password reset requests</h2><div id="rlink"></div><div id="resets"></div>
 </div><p id="err"></p>
 <script>
 const sb=supabase.createClient("https://bfirghwabailetfuepyh.supabase.co","sb_publishable_eKf6tIadS8Fq-wzSTl95hw_UcrELF5p",{auth:{persistSession:true,storage:window.sessionStorage}});
@@ -37,7 +38,7 @@ const days=d=>d?Math.ceil((new Date(d)-Date.now())/864e5):null;
 const fail=e=>{const m=e&&e.message?e.message:String(e);($("app").style.display==="block"?$("err"):$("lerr")).textContent=m};
 async function boot(){const{data:{session}}=await sb.auth.getSession();if(!session){$("login").style.display="block";$("app").style.display="none";return}
 const{data,error}=await sb.rpc("admin_list_stores");if(error){fail(error);await sb.auth.signOut();$("login").style.display="block";$("app").style.display="none";return}
-$("err").textContent="";$("lerr").textContent="";$("login").style.display="none";$("app").style.display="block";rows=data||[];draw();codes()}
+$("err").textContent="";$("lerr").textContent="";$("login").style.display="none";$("app").style.display="block";rows=data||[];draw();codes();resets()}
 function kind(r){return !r.is_active?"off":r.plan==="trial"?"trial":"paid"}
 function draw(){const n=Date.now(),day=864e5;const c=k=>rows.filter(r=>kind(r)===k).length;
 $("stats").innerHTML=[["Stores",rows.length],["Trials",c("trial")],["Paid",c("paid")],["Expired/blocked",c("off")],["New 24h",rows.filter(r=>n-new Date(r.created_at)<day).length],["Flagged",rows.filter(r=>r.same_whatsapp>1).length]].map(x=>`<div class="st"><b>${x[1]}</b><span>${x[0]}</span></div>`).join("");
@@ -45,7 +46,7 @@ const q=$("q").value.toLowerCase(),f=$("f").value;
 $("list").innerHTML=rows.filter(r=>(f==="all"||(f==="flag"?r.same_whatsapp>1:kind(r)===f))&&(!q||[r.business_name,r.slug,r.whatsapp_number,r.email].some(v=>String(v||"").toLowerCase().includes(q)))).map(r=>{const d=days(r.plan==="trial"?r.trial_ends_at:r.expires_at);
 return`<div class="card ${r.same_whatsapp>1?"flag":""} ${r.is_active?"":"off"}"><b>${esc(r.business_name)}</b> <span class="chip">${esc(r.plan)}${r.status!=="active"?" · "+esc(r.status):""}</span>
 <div class="mut"><a href="/${esc(r.slug)}/" target="_blank">/${esc(r.slug)}</a> · ${r.product_count}/${r.product_limit} products${d!==null?" · "+(d<0?"ended":d+"d left"):""}<br>${esc(r.whatsapp_number)} · ${esc(r.email)}<br>Joined ${new Date(r.created_at).toLocaleDateString()}${r.same_whatsapp>1?` · <b style="color:var(--amb)">⚠ ${r.same_whatsapp} stores share this WhatsApp</b>`:""}</div>
-<div class="row"><button class="g" onclick="plan('${r.id}')">Plan</button><button class="g" onclick="blk('${r.id}',${r.status==="suspended"})">${r.status==="suspended"?"Unblock":"Block"}</button><button class="r" onclick="del('${r.id}','${esc(r.slug)}')">Delete</button></div></div>`}).join("")||'<p class="mut">No stores match.</p>'}
+<div class="row"><button class="g" onclick="plan('${r.id}')">Plan</button><button class="g" onclick="mkreset('${r.id}','${esc(r.whatsapp_number)}')">Reset link</button><button class="g" onclick="blk('${r.id}',${r.status==="suspended"})">${r.status==="suspended"?"Unblock":"Block"}</button><button class="r" onclick="del('${r.id}','${esc(r.slug)}')">Delete</button></div></div>`}).join("")||'<p class="mut">No stores match.</p>'}
 async function act(p){const{error}=await sb.rpc(...p);if(error)return fail(error);boot()}
 window.plan=id=>{const v=prompt("Set plan and days, e.g.  basic 365   or   ceo 365   or   trial 14   (leave days out for no expiry)");if(!v)return;const[a,b]=v.trim().split(/\s+/);act(["admin_update_store",{p_id:id,p_plan:a.toLowerCase(),p_days:b?parseInt(b):null}])};
 window.blk=(id,un)=>{if(confirm((un?"Unblock":"Block")+" this store?"))act(["admin_update_store",{p_id:id,p_status:un?"active":"suspended"}])};
@@ -58,6 +59,12 @@ async function codes(){const{data,error}=await sb.rpc("admin_list_codes");if(err
 $("cg").onclick=async()=>{const{data,error}=await sb.rpc("admin_generate_codes",{p_plan:$("cp").value,p_days:parseInt($("cd").value)||null,p_count:parseInt($("cn").value)||1});if(error)return fail(error);$("cout").value=data.join("\n");codes()};
 $("tg").onclick=()=>{const s=$("pw").type==="password";$("pw").type=s?"text":"password";$("tg").textContent=s?"Hide":"Show"};
 $("pw").onkeydown=e=>{if(e.key==="Enter")$("go").click()};
+window.mkreset=async(uid,num,rid)=>{const{data,error}=await sb.rpc("admin_create_reset_link",{p_user_id:uid,p_request_id:rid||null});if(error)return fail(error);
+const link=location.origin+"/reset#"+data,wa="https://wa.me/"+String(num||"").replace(/\D/g,"")+"?text="+encodeURIComponent("VEACASY password reset. Open this link within 30 minutes (works once): "+link);
+$("rlink").innerHTML=`<div class="card"><b>Reset link ready</b> <span class="mut">(30 min, one use)</span><input readonly value="${esc(link)}" style="width:100%;margin-top:8px" onclick="this.select()"><div class="row"><a class="chip" href="${esc(wa)}" target="_blank" style="padding:8px 12px">Send on WhatsApp</a></div></div>`;resets()};
+window.dsm=async id=>{await sb.rpc("admin_dismiss_reset",{p_id:id});resets()};
+async function resets(){const{data,error}=await sb.rpc("admin_list_resets");if(error)return fail(error);
+$("resets").innerHTML=(data||[]).map(r=>`<div class="card ${r.user_id?"":"flag"}"><b>${esc(r.email)}</b> <span class="mut">${new Date(r.created_at).toLocaleString()}</span><div class="mut">${r.user_id?esc(r.business_name||"Account without store")+" · registered WhatsApp "+esc(r.store_whatsapp||"-"):"⚠ No account with this email"}<br>Number they entered: ${esc(r.whatsapp)}</div><div class="row">${r.user_id?`<button onclick="mkreset('${r.user_id}','${esc(r.store_whatsapp||r.whatsapp)}',${r.rid})">Create link</button>`:""}<button class="g" onclick="dsm(${r.rid})">Dismiss</button></div></div>`).join("")||'<p class="mut">No pending requests.</p>'}
 $("go").onclick=async()=>{$("lerr").textContent="";$("go").disabled=true;$("go").textContent="Signing in...";const{error}=await sb.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});$("go").disabled=false;$("go").textContent="Sign in";if(error)return fail(error);boot()};
 $("out").onclick=async()=>{await sb.auth.signOut();boot()};$("q").oninput=draw;$("f").onchange=draw;boot();
 </script></body></html>
