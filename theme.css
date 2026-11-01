@@ -1,0 +1,10 @@
+/* Veacasy shared theme: link this in every page BEFORE the page's own <style>. */
+:root{--blue:#0a2fd1;--blue2:#061f9c;--bg:#eef1fb;--card:#fff;--ink:#0d1433;--mute:#5d6690;--line:#dde2f5;--soft:#e6ebff;--ok:#17a673;--danger:#c0392b;--seller:#0a2fd1;
+--font:'Bricolage Grotesque',system-ui,-apple-system,'Segoe UI',sans-serif;--r:20px;--hero:linear-gradient(160deg,#0a2fd1,#061f9c);
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root{--bg:#0a0f26;--card:#131a3d;--ink:#eef1ff;--mute:#9aa4d6;--line:#243068;--soft:#1b2556;color-scheme:dark}}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--font);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+:focus-visible{outline:3px solid #7aa2ff;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

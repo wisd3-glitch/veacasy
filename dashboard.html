@@ -2,9 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Veacasy — Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet"><link rel="stylesheet" href="/theme.css">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
   onerror="this.onerror=null;this.src='https://unpkg.com/@supabase/supabase-js@2';"></script>
@@ -525,25 +525,104 @@
     .login-card{padding:30px 22px 24px;border-radius:20px;}
   }
 .pagination-wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:14px;padding-top:14px}.pagination-summary{font-size:12px;color:var(--muted)}.pagination{display:flex;align-items:center;gap:4px;flex-wrap:wrap;justify-content:flex-end}.page-btn{min-width:32px;height:32px;padding:0 9px;border:0;background:transparent;color:var(--muted);border-radius:8px;font:500 12px inherit;cursor:pointer}.page-btn:hover:not(:disabled){background:rgba(0,0,0,.04)}.page-btn.active{background:var(--accent);color:#fff}.page-btn.nav{padding:0 10px}.page-btn:disabled{opacity:.35;cursor:default}.page-gap{font-size:12px;color:var(--muted);padding:0 2px}@media(max-width:620px){.pagination-wrap{align-items:flex-start;flex-direction:column}.pagination{width:100%;justify-content:flex-start}.page-btn.nav{order:-1}}</style>
+<style>
+:root{--paper:var(--bg);--panel:var(--card);--accent:var(--blue);--ink:#0d1433;--line:#dde2f5;--muted:#5d6690;--brand-blue:#0a2fd1}
+@media(prefers-color-scheme:dark){:root{--ink:#eef1ff;--line:#243068;--muted:#9aa4d6}}
+body,button,input,select,textarea{font-family:var(--font)}
+h1,.login-card h1{font-family:var(--font);font-weight:800;letter-spacing:-.02em}
+.wrap{padding-top:0}
+header{background:var(--hero);color:#fff;margin:0 -18px 18px;padding:calc(20px + env(safe-area-inset-top,0px)) 18px 26px;border-radius:0 0 28px 28px}
+header h1{color:#fff}header .eyebrow{color:#cfd9ff}
+.logo-slot{background:rgba(255,255,255,.18);color:#fff;border-radius:50%;width:54px;height:54px}
+.acct-btn{background:#fff!important;color:var(--blue)!important;font-weight:800}
+.acct-go{padding:4px 0 8px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+.acct-go button{display:block;width:100%;text-align:left;background:none;border:0;padding:10px 4px;font:inherit;font-weight:600;color:var(--ink);cursor:pointer}
+nav{background:var(--card);border:1px solid var(--line);border-radius:16px}
+nav button{font-weight:600;border-radius:12px;color:var(--muted)}
+nav button.active{background:var(--blue);color:#fff}
+.panel{border:1px solid var(--line);border-radius:20px;box-shadow:none}
+.ov-seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:3px;width:max-content;margin:0 0 12px}
+.ov-seg button{border:0;background:none;padding:7px 14px;border-radius:9px;font:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer}
+.ov-seg button.on{background:var(--blue);color:#fff}
+.ov-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px}
+.ov-stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 11px}
+.ov-stat small{display:block;color:var(--muted);font-size:11.5px;line-height:1.25;min-height:29px}
+.ov-stat b{font-size:25px;font-weight:800;letter-spacing:-.02em}
+.ov-box{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.ov-box h3{margin:0 0 12px;font-size:16px}
+.ov-bars{display:flex;align-items:flex-end;gap:6px;height:130px}
+.ov-bars div{flex:1;text-align:center;font-size:10.5px;color:var(--muted);display:flex;flex-direction:column;justify-content:flex-end;height:100%}
+.ov-bars i{display:block;background:linear-gradient(var(--blue),#5b82ff);border-radius:7px 7px 3px 3px;margin-bottom:5px;min-height:2px}
+.ov-top{display:flex;align-items:center;gap:10px;margin-bottom:12px;font-size:13.5px;font-weight:600}
+.ov-top .n{flex:1;min-width:0}.ov-top .n span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ov-meter{height:7px;border-radius:9px;background:var(--soft);margin-top:5px;overflow:hidden}.ov-meter i{display:block;height:100%;background:var(--blue);border-radius:9px}
+.ov-note{font-size:12px;color:var(--muted);text-align:center;margin:4px 8px 14px;line-height:1.5}
+.ov-empty{color:var(--muted);font-size:14px;text-align:center;padding:14px 6px}
+</style>
+<style>
+#loginGate{min-height:100vh;background:radial-gradient(circle at 88% 6%,rgba(122,162,255,.5),transparent 42%),var(--hero);color:#fff;padding:0}
+#loginGate .auth-shell{min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+.auth-top{display:flex;align-items:center;justify-content:space-between;padding:calc(18px + env(safe-area-inset-top,0px)) 20px 0}
+.auth-brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.02em;font-size:16px}
+.auth-mark{width:38px;height:38px;border-radius:11px;background:#fff;display:grid;place-items:center;overflow:hidden;padding:4px}
+.auth-mark img{width:100%;height:100%;object-fit:contain}
+.auth-back{color:#cfd9ff;font-size:14px;font-weight:600;text-decoration:none}
+.auth-pitch{padding:30px 22px 30px}
+.auth-pitch h2{margin:0;font-size:clamp(28px,8vw,36px);font-weight:800;letter-spacing:-.025em;line-height:1.05;max-width:13em}
+.auth-pitch p{margin:10px 0 0;color:#cfd9ff;font-size:15px}
+#loginGate .login-card{flex:1;max-width:none;width:100%;margin:0;background:var(--card);color:var(--ink);border:0;box-shadow:none;border-radius:28px 28px 0 0;padding:26px 22px calc(34px + env(safe-area-inset-bottom,0px))}
+#loginGate .login-card h1{margin:0;font-size:26px;color:var(--ink)}
+#loginGate .login-card p{color:var(--muted);font-family:var(--font)}
+#loginGate .auth-sub{margin:4px 0 18px;font-size:14.5px}
+#loginGate .login-field{margin-bottom:14px}
+#loginGate .login-field label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:0 0 6px}
+#loginGate .login-card input,#loginGate .login-card select{width:100%;background:var(--bg);color:var(--ink);border:1.5px solid var(--line);border-radius:14px;padding:14px;font:inherit;font-size:16px;box-shadow:none}
+#loginGate .login-card input:focus,#loginGate .login-card select:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,47,209,.16)}
+#loginGate .slug-box{display:flex;align-items:center;background:var(--bg);border:1.5px solid var(--line);border-radius:14px;overflow:hidden}
+#loginGate .slug-box:focus-within{border-color:var(--blue);box-shadow:0 0 0 3px rgba(10,47,209,.16)}
+#loginGate .slug-box span{padding-left:14px;color:var(--muted);font-size:14px;white-space:nowrap}
+#loginGate .slug-box input{border:0;background:transparent;padding-left:2px;box-shadow:none!important}
+#loginGate .login-btn{display:block;width:100%;margin-top:6px;background:var(--blue);color:#fff;border:0;border-radius:16px;padding:15px;font:inherit;font-size:16px;font-weight:700;cursor:pointer;transition:transform .12s}
+#loginGate .login-btn:active{transform:scale(.98)}
+#loginGate .login-btn:disabled{opacity:.6}
+#loginGate .login-error{margin:0 0 12px;padding:10px 12px;border-radius:12px;background:rgba(192,57,43,.12);color:var(--danger);font-size:13.5px;display:none}
+#loginGate .login-error.show{display:block}
+#loginGate .login-switch{text-align:center;margin:16px 0 0;font-size:14.5px}
+#loginGate .login-switch button{background:none;border:0;color:var(--blue);font:inherit;font-weight:700;cursor:pointer;padding:0}
+#loginGate .auth-forgot{text-align:center;margin:14px 0 0;font-size:14px}
+#loginGate .auth-forgot a,#loginGate .auth-fine a{color:var(--blue);font-weight:600;text-decoration:none}
+#loginGate .auth-fine{font-size:12.5px;text-align:center;margin:12px 0 0;line-height:1.5}
+#loginGate .perks{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+#loginGate .perks span{background:var(--soft);color:var(--blue);font-size:12.5px;font-weight:600;padding:6px 11px;border-radius:99px}
+#loginGate .auth-sep{height:1px;background:var(--line);margin:18px 0}
+@media(prefers-color-scheme:dark){#loginGate .perks span,#loginGate .auth-forgot a,#loginGate .auth-fine a,#loginGate .login-switch button{color:#8fb0ff}}
+@media(min-width:620px){#loginGate .auth-shell{padding-bottom:40px}#loginGate .login-card{flex:none;border-radius:28px;box-shadow:0 24px 60px rgba(3,10,60,.4)}}
+</style>
 </head>
 <body>
 
 <div class="login-wrap" id="loginGate">
-  <a class="home-link" href="/" aria-label="Back to VEACASY welcome page"><svg class="back-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg> Back to VEACASY</a>
+ <div class="auth-shell">
+  <div class="auth-top">
+    <span class="auth-brand"><span class="auth-mark"><img src="/veacasy-logo.jpeg" alt=""></span>VEACASY</span>
+    <a class="auth-back" href="/" aria-label="Back to VEACASY welcome page">Back to site</a>
+  </div>
+  <div class="auth-pitch">
+    <h2>Turn your products into a WhatsApp catalog.</h2>
+    <p>Set up in minutes. No website needed.</p>
+  </div>
   <div class="login-card">
-    <div class="login-logo"><img src="/veacasy-logo.jpeg" alt="VEACASY"></div>
-
     <div id="loginForm">
       <h1>Welcome back</h1>
-      <p>Log in to manage your store</p>
+      <p class="auth-sub">Log in to manage your store</p>
       <p class="login-error" id="login-error"></p>
       <div class="login-field">
         <label for="login-email">Email</label>
-        <input type="email" id="login-email" placeholder="you@example.com">
+        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email" inputmode="email">
       </div>
       <div class="login-field">
         <label for="login-password">Password</label>
-        <input type="password" id="login-password" placeholder="••••••••">
+        <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password">
       </div>
       <button class="login-btn" id="login-btn">Log in</button>
       <p class="login-switch">New to Veacasy? <button id="showSignup">Create your store</button></p>
@@ -551,37 +630,40 @@
 
     <div id="signupForm" style="display:none;">
       <h1>Create your store</h1>
-      <p>Set up your Veacasy catalog in a couple minutes</p>
+      <p class="auth-sub">Your catalog will be ready in a couple of minutes</p>
+      <div class="perks"><span>14 days free</span><span>Up to 20 products</span><span>No card needed</span></div>
       <p class="login-error" id="signup-error"></p>
       <div class="login-field">
         <label for="signup-name">Business name</label>
-        <input type="text" id="signup-name" placeholder="e.g. Sparkles by Annie">
+        <input type="text" id="signup-name" placeholder="e.g. Sparkles by Annie" autocomplete="organization">
       </div>
       <div class="login-field">
         <label for="signup-slug">Your store link</label>
-        <input type="text" id="signup-slug" placeholder="auto-fills from business name">
+        <div class="slug-box"><span>veacasy.vercel.app/</span><input type="text" id="signup-slug" placeholder="your-store" autocapitalize="none" autocorrect="off"></div>
       </div>
       <div class="login-field">
         <label for="signup-whatsapp">WhatsApp number</label>
-        <input type="tel" id="signup-whatsapp" placeholder="2348012345678">
+        <input type="tel" id="signup-whatsapp" placeholder="2348012345678" inputmode="tel" autocomplete="tel">
       </div>
       <div class="login-field">
         <label for="signup-currency">Store currency</label>
         <select id="signup-currency"><option value="NGN">Nigerian Naira (₦)</option><option value="USD">US Dollar ($)</option><option value="GBP">British Pound (£)</option><option value="EUR">Euro (€)</option><option value="GHS">Ghanaian Cedi</option><option value="KES">Kenyan Shilling</option><option value="ZAR">South African Rand</option><option value="CAD">Canadian Dollar</option><option value="AUD">Australian Dollar</option><option value="INR">Indian Rupee</option><option value="AED">UAE Dirham</option><option value="XOF">West African CFA franc</option></select>
       </div>
+      <div class="auth-sep"></div>
       <div class="login-field">
         <label for="signup-email">Email</label>
-        <input type="email" id="signup-email" placeholder="you@example.com">
+        <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email" inputmode="email">
       </div>
       <div class="login-field">
         <label for="signup-password">Password</label>
-        <input type="password" id="signup-password" placeholder="At least 6 characters">
+        <input type="password" id="signup-password" placeholder="At least 6 characters" autocomplete="new-password">
       </div>
-      <p style="font-size:12.5px;color:#5f6b7a;margin:2px 0 12px;">Try it free for 14 days. Up to 20 products, no card, no pressure.<br>By creating a store you agree to our <a href="/terms" style="color:#2196F3">Terms</a> and <a href="/privacy" style="color:#2196F3">Privacy Policy</a>.</p>
       <button class="login-btn" id="signup-btn">Create store</button>
+      <p class="auth-fine">By creating a store you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
       <p class="login-switch">Already have a store? <button id="showLogin">Log in</button></p>
     </div>
   </div>
+ </div>
 </div>
 
 <div id="dashboardContent" style="display:none;">
@@ -599,11 +681,13 @@
   <div id="planBanner"></div>
 
   <nav>
-    <button class="active" data-tab="products">Products</button>
+    <button class="active" data-tab="overview">Overview</button>
+    <button data-tab="products">Products</button>
     <button data-tab="settings">Store Settings</button>
   </nav>
 
-  <div id="productsTab"></div>
+  <div id="overviewTab"></div>
+  <div id="productsTab" style="display:none;"></div>
   <div id="settingsTab" style="display:none;"></div>
 
 </div>
@@ -960,13 +1044,6 @@
     const safeAccentHex = hslToHex(h, s, safeL);
     const bgS = tone => isNeutral ? 0 : tone; // neutral picks get a true gray theme, not a false tint
 
-    const root = document.documentElement.style;
-    root.setProperty("--accent", safeAccentHex);
-    root.setProperty("--paper", hslToHex(h, bgS(22), 93));
-    root.setProperty("--panel", hslToHex(h, bgS(20), 98));
-    root.setProperty("--line", hslToHex(h, bgS(22), 82));
-    root.setProperty("--muted", hslToHex(h, bgS(14), 42));
-    root.setProperty("--ink", hslToHex(h, bgS(22), 14));
     return safeAccentHex;
   }
   function slugify(str){
@@ -1377,10 +1454,69 @@
       document.querySelectorAll("nav button").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       const tab = btn.dataset.tab;
+      document.getElementById("overviewTab").style.display = tab === "overview" ? "block" : "none";
+      if (tab === "overview") renderOverviewTab();
       document.getElementById("productsTab").style.display = tab === "products" ? "block" : "none";
       document.getElementById("settingsTab").style.display = tab === "settings" ? "block" : "none";
     };
   });
+
+  // ─── OVERVIEW (store activity numbers) ─────────────────────────
+  let ovDays = 7;
+  function ovEsc(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c])); }
+  function addMenuShortcuts(){
+    const m = document.getElementById("acctMenu");
+    if (!m || m.querySelector(".acct-go")) return;
+    m.insertAdjacentHTML("afterbegin", '<div class="acct-go"><button data-go="overview">Overview</button><button data-go="products">Products</button><button data-go="settings">Store settings</button></div>');
+    m.querySelectorAll("[data-go]").forEach(b => b.onclick = () => {
+      const t = document.querySelector('nav button[data-tab="' + b.dataset.go + '"]');
+      if (t) t.click();
+      m.classList.remove("open");
+    });
+  }
+  async function renderOverviewTab(){
+    const el = document.getElementById("overviewTab");
+    if (!el || !currentVendorId) return;
+    el.innerHTML = '<p class="ov-empty">Loading your numbers…</p>';
+    const since = new Date(Date.now() - ovDays * 864e5).toISOString();
+    const { data, error } = await getSupabase().from("events").select("type,product_id,created_at").eq("vendor_id", currentVendorId).gte("created_at", since).limit(10000);
+    if (error){
+      el.innerHTML = '<div class="ov-box"><h3>Numbers are not switched on yet</h3><p class="ov-empty">The activity table has not been created. Run setup-events.sql once in Supabase, then refresh this page.</p></div>';
+      return;
+    }
+    const rows = data || [];
+    const n = t => rows.filter(r => r.type === t).length;
+    const buckets = ovDays === 7 ? 7 : 10, size = ovDays / buckets, now = Date.now(), counts = new Array(buckets).fill(0);
+    rows.filter(r => r.type === "visit").forEach(r => {
+      const age = (now - new Date(r.created_at).getTime()) / 864e5;
+      const i = buckets - 1 - Math.min(buckets - 1, Math.floor(age / size));
+      counts[i]++;
+    });
+    const max = Math.max(1, ...counts);
+    const labels = counts.map((_, i) => {
+      const d = new Date(now - (buckets - 1 - i) * size * 864e5);
+      return ovDays === 7 ? "SMTWTFS".charAt(d.getDay()) : d.getDate() + "/" + (d.getMonth() + 1);
+    });
+    const tally = {};
+    rows.filter(r => r.type === "click" && r.product_id).forEach(r => { tally[r.product_id] = (tally[r.product_id] || 0) + 1; });
+    const top = Object.entries(tally).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    let names = {};
+    if (top.length){
+      const { data: ps } = await getSupabase().from("products").select("id,name").eq("vendor_id", currentVendorId).in("id", top.map(t => t[0]));
+      (ps || []).forEach(p => { names[String(p.id)] = p.name; });
+    }
+    const topMax = top.length ? top[0][1] : 1;
+    el.innerHTML =
+      '<div class="ov-seg" id="ovSeg"><button data-d="7" class="' + (ovDays === 7 ? "on" : "") + '">7 days</button><button data-d="30" class="' + (ovDays === 30 ? "on" : "") + '">30 days</button></div>' +
+      '<div class="ov-stats"><div class="ov-stat"><small>Store visits</small><b>' + n("visit").toLocaleString() + '</b></div><div class="ov-stat"><small>Product clicks</small><b>' + n("click").toLocaleString() + '</b></div><div class="ov-stat"><small>Orders sent to WhatsApp</small><b>' + n("order_sent").toLocaleString() + '</b></div></div>' +
+      '<div class="ov-box"><h3>Visits</h3><div class="ov-bars">' + counts.map((v, i) => '<div title="' + v + ' visits"><i style="height:' + Math.round(v / max * 100) + 'px"></i>' + labels[i] + '</div>').join("") + '</div></div>' +
+      '<div class="ov-box"><h3>Top clicked products</h3>' + (top.length ? top.map(t => '<div class="ov-top"><div class="n"><span>' + ovEsc(names[t[0]] || "Removed product") + '</span><div class="ov-meter"><i style="width:' + Math.round(t[1] / topMax * 100) + '%"></i></div></div><span>' + t[1] + '</span></div>').join("") : '<p class="ov-empty">No clicks yet. Share your store link to get started.</p>') + '</div>' +
+      '<p class="ov-note">“Orders sent” counts taps on Send to WhatsApp. Veacasy does not take orders or payments.</p>';
+    document.getElementById("ovSeg").onclick = e => {
+      const b = e.target.closest("[data-d]");
+      if (b){ ovDays = Number(b.dataset.d); renderOverviewTab(); }
+    };
+  }
 
   function renderLogo(){
     const slot = document.getElementById("logoSlot");
@@ -1451,6 +1587,8 @@
     renderSettingsTab();
     renderLogo();
     applyTheme(settings.accent);
+    addMenuShortcuts();
+    renderOverviewTab();
   }
 
   // ─── TAB SESSION + 30-MINUTE INACTIVITY TIMEOUT ───────────────
@@ -1651,13 +1789,13 @@
     b.type = "button";
     b.textContent = "Show";
     b.setAttribute("aria-label", "Show or hide password");
-    b.style.cssText = "position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;color:#2196F3;font-weight:600;font-size:13px;cursor:pointer;padding:6px;";
+    b.style.cssText = "position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;color:#0a2fd1;font-weight:600;font-size:13px;cursor:pointer;padding:6px;";
     b.onclick = () => { const s = input.type === "password"; input.type = s ? "text" : "password"; b.textContent = s ? "Hide" : "Show"; };
     wrap.appendChild(b);
   }
   addPasswordToggle("login-password");
   addPasswordToggle("signup-password");
-  document.getElementById("login-password").parentNode.insertAdjacentHTML("afterend", '<p style="text-align:right;margin:6px 0 0;font-size:13px;"><a href="/reset" style="color:#2196F3;">Forgot password?</a></p>');
+  document.getElementById("login-password").parentNode.insertAdjacentHTML("afterend", '<p style="text-align:right;margin:6px 0 0;font-size:13px;"><a href="/reset" style="color:var(--blue);font-weight:600;text-decoration:none;">Forgot password?</a></p>');
 
   checkLogin().catch((err) => {
     console.error("Veacasy startup error:", err);
