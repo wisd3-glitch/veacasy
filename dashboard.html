@@ -1393,7 +1393,9 @@ nav button.active{background:var(--blue);color:#fff}
           ${swatches.map(c => `<button type="button" class="color-swatch ${c.toLowerCase() === settings.accent.toLowerCase() ? "selected" : ""}" data-color="${c}" style="background:${c};"></button>`).join("")}
         </div>
         <input type="color" id="s-accent" value="${settings.accent}" style="margin-top:8px;">
-        <p style="font-size:12px; color:var(--muted); margin:6px 0 0;">This color is used for buttons and accents on your storefront.</p>
+        <div id="brandPreview" style="margin-top:14px;border-radius:18px;padding:16px;color:#fff;display:flex;align-items:center;justify-content:space-between;gap:10px;"><div><b>${ovEsc(settings.businessName) || "Your store"}</b><div style="font-size:12px;opacity:.85;">Header preview</div></div><span id="bpBtn" style="background:#fff;border-radius:10px;padding:8px 14px;font-weight:700;font-size:13px;">Add to cart</span></div>
+        <p style="margin:10px 0 0;font-size:14px;color:var(--muted);">Price: <b id="bpPrice" style="font-size:16px;">5,000</b></p>
+        <p style="font-size:12px; color:var(--muted); margin:6px 0 0;">Your store header, buttons and prices use this color as a gradient, on both your storefront and product pages. Very light colors are darkened slightly so text stays readable.</p>
       </div>
 
       <div class="panel">
@@ -1427,8 +1429,14 @@ nav button.active{background:var(--blue);color:#fff}
         document.getElementById("s-accent").value = sw.dataset.color;
         document.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("selected"));
         sw.classList.add("selected");
+        paintPreview(sw.dataset.color);
       };
     });
+    document.getElementById("s-accent").oninput = e => {
+      document.querySelectorAll(".color-swatch").forEach(s => s.classList.remove("selected"));
+      paintPreview(e.target.value);
+    };
+    paintPreview(document.getElementById("s-accent").value);
     document.getElementById("settingsSaveBtn").onclick = async () => {
       const btn = document.getElementById("settingsSaveBtn");
       const newName = document.getElementById("s-name").value.trim();
@@ -1507,6 +1515,14 @@ nav button.active{background:var(--blue);color:#fff}
   // ─── OVERVIEW (store activity numbers) ─────────────────────────
   let ovDays = 7;
   function ovEsc(v){ return String(v ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c])); }
+  function paintPreview(hex){
+    const safe = applyTheme(String(hex).toLowerCase() === "#2196f3" ? "#0a2fd1" : hex), { h, s, l } = hexToHsl(safe), dark = hslToHex(h, s, Math.max(l - 16, 6));
+    const box = document.getElementById("brandPreview");
+    if (!box) return;
+    box.style.background = "linear-gradient(160deg," + safe + "," + dark + ")";
+    document.getElementById("bpBtn").style.color = safe;
+    document.getElementById("bpPrice").style.color = safe;
+  }
   function addMenuShortcuts(){
     const m = document.getElementById("acctMenu");
     if (!m || m.querySelector(".acct-go")) return;
