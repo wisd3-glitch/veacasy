@@ -109,12 +109,12 @@ function track(type,productId){try{getSupabase().from("events").insert({vendor_i
 /* Cart is saved per store so it survives opening a product page and coming back. */
 const ckey=()=>"veacasy_cart_"+slug;
 function loadCart(){try{cart=JSON.parse(sessionStorage.getItem(ckey())||"{}")||{};}catch(e){cart={};}
-  Object.keys(cart).forEach(c=>{if(!products.some(p=>p.code===c&&p.in_stock)||!(cart[c]>0))delete cart[c];});}
+  Object.keys(cart).forEach(c=>{if(!products.some(p=>String(p.code)===c&&p.in_stock)||!(cart[c]>0))delete cart[c];});}
 function saveCart(){try{sessionStorage.setItem(ckey(),JSON.stringify(cart));}catch(e){}}
-const byCode=c=>products.find(p=>p.code===c);
+const byCode=c=>products.find(p=>String(p.code)===String(c));
 const count=()=>Object.values(cart).reduce((a,b)=>a+b,0);
-const total=()=>Object.keys(cart).reduce((s,c)=>s+cart[c]*Number(byCode(c).price||0),0);
-function message(){const ks=Object.keys(cart);return `Hello ${vendor.business_name||"there"}, I’d like to order:\n`+ks.map(c=>{const p=byCode(c);return `${cart[c]}× ${p.name} (${money(cart[c]*Number(p.price||0))})`}).join("\n")+`\nTotal: ${money(total())}`;}
+const total=()=>Object.keys(cart).reduce((s,c)=>{const p=byCode(c);return s+(p?cart[c]*Number(p.price||0):0)},0);
+function message(){const ks=Object.keys(cart).filter(c=>byCode(c));return `Hello ${vendor.business_name||"there"}, I’d like to order:\n`+ks.map(c=>{const p=byCode(c);return `${cart[c]}× ${p.name} (${money(cart[c]*Number(p.price||0))})`}).join("\n")+`\nTotal: ${money(total())}`;}
 
 function shell(){
   $("app").innerHTML=`<header class="hero"><div class="hero-in"><div class="row"><div class="logo">${vendor.logo_url?`<img src="${esc(vendor.logo_url)}" alt="${esc(vendor.business_name||"Store")} logo">`:initial(vendor.business_name)}</div><div><h1>${esc(vendor.business_name||"Store")}</h1>${vendor.tagline?`<p class="tagline">${esc(vendor.tagline)}</p>`:""}</div></div>
@@ -161,7 +161,7 @@ function drawGrid(){
 }
 function drawBar(){const n=count();$("bar").hidden=!n;$("bar").innerHTML=`<span>View cart · ${n} ${n===1?"item":"items"}</span><span>${money(total())}</span>`;}
 function drawCart(){
-  const ks=Object.keys(cart);
+  const ks=Object.keys(cart).filter(c=>byCode(c));
   $("lines").innerHTML=ks.map(c=>{const p=byCode(c);return `<div class="line"><div class="mini">${thumb(p,"")||""}</div><div class="n">${esc(p.name)}<small>${money(p.price)}</small></div><div class="qty"><button data-m="${esc(c)}" aria-label="Fewer">−</button><b>${cart[c]}</b><button data-p="${esc(c)}" aria-label="More">+</button></div></div>`}).join("");
   $("tot").textContent=money(total());$("msg").textContent=ks.length?message():"";
 }
