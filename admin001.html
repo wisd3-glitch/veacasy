@@ -45,8 +45,8 @@ $("stats").innerHTML=[["Stores",rows.length],["Trials",c("trial")],["Paid",c("pa
 const q=$("q").value.toLowerCase(),f=$("f").value;
 $("list").innerHTML=rows.filter(r=>(f==="all"||(f==="flag"?r.same_whatsapp>1:kind(r)===f))&&(!q||[r.business_name,r.slug,r.whatsapp_number,r.email].some(v=>String(v||"").toLowerCase().includes(q)))).map(r=>{const d=days(r.plan==="trial"?r.trial_ends_at:r.expires_at);
 return`<div class="card ${r.same_whatsapp>1?"flag":""} ${r.is_active?"":"off"}"><b>${esc(r.business_name)}</b> <span class="chip">${esc(r.plan)}${r.status!=="active"?" · "+esc(r.status):""}</span>
-<div class="mut"><a href="/${esc(r.slug)}/" target="_blank">/${esc(r.slug)}</a> · ${r.product_count}/${r.product_limit} products · ${esc(r.currency)}${d!==null?" · "+(d<0?"ended":d+"d left"):""}<br>${esc(r.whatsapp_number)} · ${esc(r.email)}<br>Joined ${new Date(r.created_at).toLocaleDateString()}${r.same_whatsapp>1?` · <b style="color:var(--amb)">⚠ ${r.same_whatsapp} stores share this WhatsApp</b>`:""}</div>
-<div class="row"><button class="g" onclick="plan('${r.id}')">Plan</button><button class="g" onclick="mkreset('${r.id}','${esc(r.whatsapp_number)}')">Reset link</button><button class="g" onclick="blk('${r.id}',${r.status==="suspended"})">${r.status==="suspended"?"Unblock":"Block"}</button><button class="r" onclick="del('${r.id}','${esc(r.slug)}')">Delete</button></div></div>`}).join("")||'<p class="mut">No stores match.</p>'}
+<div class="mut"><a href="/${esc(r.slug)}/" target="_blank">/${esc(r.slug)}</a> · ${esc(r.product_count)}/${esc(r.product_limit)} products · ${esc(r.currency)}${d!==null?" · "+(d<0?"ended":d+"d left"):""}<br>${esc(r.whatsapp_number)} · ${esc(r.email)}<br>Joined ${new Date(r.created_at).toLocaleDateString()}${r.same_whatsapp>1?` · <b style="color:var(--amb)">⚠ ${esc(r.same_whatsapp)} stores share this WhatsApp</b>`:""}</div>
+<div class="row"><button class="g" data-act="plan" data-id="${esc(r.id)}">Plan</button><button class="g" data-act="reset" data-id="${esc(r.id)}" data-num="${esc(r.whatsapp_number)}">Reset link</button><button class="g" data-act="block" data-id="${esc(r.id)}" data-un="${r.status==="suspended"?1:0}">${r.status==="suspended"?"Unblock":"Block"}</button><button class="r" data-act="del" data-id="${esc(r.id)}" data-slug="${esc(r.slug)}">Delete</button></div></div>`}).join("")||'<p class="mut">No stores match.</p>'}
 async function act(p){const{error}=await sb.rpc(...p);if(error)return fail(error);boot()}
 window.plan=id=>{const v=prompt("Set plan and days, e.g.  basic 365   or   ceo 365   or   trial 14   (leave days out for no expiry)");if(!v)return;const[a,b]=v.trim().split(/\s+/);act(["admin_update_store",{p_id:id,p_plan:a.toLowerCase(),p_days:b?parseInt(b):null}])};
 window.blk=(id,un)=>{if(confirm((un?"Unblock":"Block")+" this store?"))act(["admin_update_store",{p_id:id,p_status:un?"active":"suspended"}])};
@@ -55,7 +55,7 @@ const{data:urls}=await sb.rpc("admin_store_photos",{p_id:id});
 const paths=(urls||[]).map(u=>{const k=u.indexOf("/product-photos/");return k<0?null:decodeURIComponent(u.slice(k+16).split("?")[0])}).filter(Boolean);
 for(let k=0;k<paths.length;k+=100){const{error}=await sb.storage.from("product-photos").remove(paths.slice(k,k+100));if(error)return fail(error)}
 act(["admin_delete_store",{p_id:id}])};
-async function codes(){const{data,error}=await sb.rpc("admin_list_codes");if(error)return fail(error);$("codes").innerHTML=(data||[]).map(c=>`<div class="mut"><b style="color:var(--ink)">${esc(c.code)}</b> · ${esc(c.plan)} · ${c.days??"∞"}d · ${c.used?"used":"unused"}</div>`).join("")||'<p class="mut">No codes yet.</p>'}
+async function codes(){const{data,error}=await sb.rpc("admin_list_codes");if(error)return fail(error);$("codes").innerHTML=(data||[]).map(c=>`<div class="mut"><b style="color:var(--ink)">${esc(c.code)}</b> · ${esc(c.plan)} · ${esc(c.days??"∞")}d · ${c.used?"used":"unused"}</div>`).join("")||'<p class="mut">No codes yet.</p>'}
 $("cg").onclick=async()=>{const{data,error}=await sb.rpc("admin_generate_codes",{p_plan:$("cp").value,p_days:parseInt($("cd").value)||null,p_count:parseInt($("cn").value)||1});if(error)return fail(error);$("cout").value=data.join("\n");codes()};
 $("tg").onclick=()=>{const s=$("pw").type==="password";$("pw").type=s?"text":"password";$("tg").textContent=s?"Hide":"Show"};
 $("pw").onkeydown=e=>{if(e.key==="Enter")$("go").click()};
@@ -64,7 +64,14 @@ const link=location.origin+"/reset#"+data,wa="https://wa.me/"+String(num||"").re
 $("rlink").innerHTML=`<div class="card"><b>Reset link ready</b> <span class="mut">(30 min, one use)</span><input readonly value="${esc(link)}" style="width:100%;margin-top:8px" onclick="this.select()"><div class="row"><a class="chip" href="${esc(wa)}" target="_blank" style="padding:8px 12px">Send on WhatsApp</a></div></div>`;resets()};
 window.dsm=async id=>{await sb.rpc("admin_dismiss_reset",{p_id:id});resets()};
 async function resets(){const{data,error}=await sb.rpc("admin_list_resets");if(error)return fail(error);
-$("resets").innerHTML=(data||[]).map(r=>`<div class="card ${r.user_id?"":"flag"}"><b>${esc(r.email)}</b> <span class="mut">${new Date(r.created_at).toLocaleString()}</span><div class="mut">${r.user_id?esc(r.business_name||"Account without store")+" · registered WhatsApp "+esc(r.store_whatsapp||"-"):"⚠ No account with this email"}<br>Number they entered: ${esc(r.whatsapp)}</div><div class="row">${r.user_id?`<button onclick="mkreset('${r.user_id}','${esc(r.store_whatsapp||r.whatsapp)}',${r.rid})">Create link</button>`:""}<button class="g" onclick="dsm(${r.rid})">Dismiss</button></div></div>`).join("")||'<p class="mut">No pending requests.</p>'}
+$("resets").innerHTML=(data||[]).map(r=>`<div class="card ${r.user_id?"":"flag"}"><b>${esc(r.email)}</b> <span class="mut">${new Date(r.created_at).toLocaleString()}</span><div class="mut">${r.user_id?esc(r.business_name||"Account without store")+" · registered WhatsApp "+esc(r.store_whatsapp||"-"):"⚠ No account with this email"}<br>Number they entered: ${esc(r.whatsapp)}</div><div class="row">${r.user_id?`<button data-act="mk" data-id="${esc(r.user_id)}" data-num="${esc(r.store_whatsapp||r.whatsapp)}" data-rid="${esc(r.rid)}">Create link</button>`:""}<button class="g" data-act="dsm" data-rid="${esc(r.rid)}">Dismiss</button></div></div>`).join("")||'<p class="mut">No pending requests.</p>'}
 $("go").onclick=async()=>{$("lerr").textContent="";$("go").disabled=true;$("go").textContent="Signing in...";const{error}=await sb.auth.signInWithPassword({email:$("em").value.trim(),password:$("pw").value});$("go").disabled=false;$("go").textContent="Sign in";if(error)return fail(error);boot()};
-$("out").onclick=async()=>{await sb.auth.signOut();boot()};$("q").oninput=draw;$("f").onchange=draw;boot();
+$("out").onclick=async()=>{await sb.auth.signOut();boot()};document.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(!b)return;const d=b.dataset;
+if(d.act==="plan")window.plan(d.id);
+else if(d.act==="reset")window.mkreset(d.id,d.num);
+else if(d.act==="block")window.blk(d.id,d.un==="1");
+else if(d.act==="del")window.del(d.id,d.slug);
+else if(d.act==="mk")window.mkreset(d.id,d.num,d.rid?Number(d.rid):undefined);
+else if(d.act==="dsm")window.dsm(Number(d.rid))});
+$("q").oninput=draw;$("f").onchange=draw;boot();
 </script></body></html>
