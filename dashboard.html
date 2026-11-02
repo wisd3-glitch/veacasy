@@ -779,7 +779,7 @@ nav button.active{background:var(--blue);color:#fff}
       .single();
 
     if (vendorErr || !vendor){
-      throw new Error("No store found for this account yet — ask whoever set up your login to link your vendor row.");
+      throw new Error("We couldn’t find a store for this login. If this is your store, message us on WhatsApp for help.");
     }
 
     settings = {
@@ -1121,18 +1121,18 @@ nav button.active{background:var(--blue);color:#fff}
           <p class="ph-note">The first photo is the main image. Large photos are compressed automatically.</p>
           <input type="file" id="productPhotoInput" accept="image/*" multiple style="display:none;">
           <label>Name</label>
-          <input type="text" id="f-name" value="${p.name}">
+          <input type="text" id="f-name" value="${ovEsc(p.name)}">
           <label>Price (${settings.currency || "NGN"})</label>
           <input type="number" id="f-price" value="${p.price}">
           <label>Category</label>
-          <input type="text" id="f-category" value="${p.category}" placeholder="e.g. Wigs">
+          <input type="text" id="f-category" value="${ovEsc(p.category)}" placeholder="e.g. Wigs">
           <label>Description <span style="color:var(--muted); font-weight:400;">(max 500 characters)</span></label>
-          <textarea id="f-desc" maxlength="500">${p.description || ""}</textarea>
+          <textarea id="f-desc" maxlength="500">${ovEsc(p.description || "")}</textarea>
           <div id="descCounter" style="font-size:11.5px;color:var(--muted);text-align:right;margin-top:4px;">${(p.description || "").length} / 500</div>
           ${!isNew ? `
           <label>Product link</label>
           <div class="link-row">
-            <span class="url">${productUrl(p)}</span>
+            <span class="url">${ovEsc(productUrl(p))}</span>
             <button class="copy-btn" id="copyProductLink">Copy</button>
           </div>` : ""}
           <div class="form-actions">
@@ -1263,7 +1263,7 @@ nav button.active{background:var(--blue);color:#fff}
       <div class="panel">
         <div class="row-between"><h2>Store link</h2></div>
         <div class="link-row">
-          <span class="url">${storeUrl()}</span>
+          <span class="url">${ovEsc(storeUrl())}</span>
           <button class="copy-btn" id="copyStoreLink">Copy</button>
         </div>
       </div>
@@ -1273,7 +1273,7 @@ nav button.active{background:var(--blue);color:#fff}
           <div class="header-actions">
             <select class="category-select" id="categoryFilterSelect">
               ${["All", ...dashboardCategories].map(c =>
-                `<option value="${c}" ${c === categoryFilter ? "selected" : ""}>${c === "All" ? "All categories" : c}</option>`
+                `<option value="${ovEsc(c)}" ${c === categoryFilter ? "selected" : ""}>${c === "All" ? "All categories" : ovEsc(c)}</option>`
               ).join("")}
             </select>
             <button class="add-btn" id="addBtn">+ Add product</button>
@@ -1282,10 +1282,10 @@ nav button.active{background:var(--blue);color:#fff}
         <div id="productList">
           ${visibleProducts.length ? visibleProducts.map(p => `
             <div class="product">
-              <div class="swatch">${p.photoUrl ? `<img src="${p.photoUrl}" alt="${p.name}">` : initials(p.name)}</div>
+              <div class="swatch">${p.photoUrl ? `<img src="${ovEsc(p.photoUrl)}" alt="${ovEsc(p.name)}">` : ovEsc(initials(p.name))}</div>
               <div class="p-details">
-                <p class="p-name">${p.name}</p>
-                <p class="p-meta">${money(p.price)} · ${p.category || "Uncategorized"}</p>
+                <p class="p-name">${ovEsc(p.name)}</p>
+                <p class="p-meta">${money(p.price)} · ${ovEsc(p.category || "Uncategorized")}</p>
               </div>
               <button class="toggle ${p.inStock ? "on" : ""}" data-id="${p.id}" title="In stock"><span class="dot"></span></button>
               <div class="actions">
@@ -1376,16 +1376,16 @@ nav button.active{background:var(--blue);color:#fff}
       <div class="panel">
         <div class="row-between"><h2>Appearance</h2></div>
         <label>Business name</label>
-        <input type="text" id="s-name" value="${settings.businessName}">
+        <input type="text" id="s-name" value="${ovEsc(settings.businessName)}">
         <label>Tagline</label>
-        <input type="text" id="s-tagline" value="${settings.tagline}">
+        <input type="text" id="s-tagline" value="${ovEsc(settings.tagline)}">
         <label>Store currency</label>
         <select id="s-currency">${currencyOptions(settings.currency)}</select>
         <p style="font-size:12.5px;color:var(--muted);margin:6px 0 0;">Customers see prices in this currency. Changing it does not convert your prices, so update your product prices after switching.</p>
         <label>Logo</label>
         <div class="file-drop" id="settingsLogoDrop" style="cursor:pointer;">
           ${settings.logoUrl
-            ? `<img src="${settings.logoUrl}" alt="Logo" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">`
+            ? `<img src="${ovEsc(settings.logoUrl)}" alt="Logo" style="width:40px;height:40px;border-radius:8px;object-fit:cover;">`
             : "Tap to upload a logo"}
         </div>
         <label>Store color</label>
@@ -1401,20 +1401,20 @@ nav button.active{background:var(--blue);color:#fff}
       <div class="panel">
         <div class="row-between"><h2>Contact Information</h2></div>
         <label>Email address</label>
-        <input type="email" id="s-email" value="${settings.contactEmail}" placeholder="you@example.com">
+        <input type="email" id="s-email" value="${ovEsc(settings.contactEmail)}" placeholder="you@example.com">
         <label>Phone number</label>
-        <input type="tel" id="s-phone" value="${settings.phone}" placeholder="0801 234 5678">
+        <input type="tel" id="s-phone" value="${ovEsc(settings.phone)}" placeholder="0801 234 5678">
         <label>WhatsApp number <span style="color:#a83232;">*</span></label>
-        <input type="tel" id="s-whatsapp" value="${settings.whatsapp}">
+        <input type="tel" id="s-whatsapp" value="${ovEsc(settings.whatsapp)}">
         <p style="font-size:12px; color:var(--muted); margin:-2px 0 14px;">Required — this is where order messages are sent.</p>
         <label>Store address</label>
-        <input type="text" id="s-address" value="${settings.address}" placeholder="Your store's physical location, if any">
+        <input type="text" id="s-address" value="${ovEsc(settings.address)}" placeholder="Your store's physical location, if any">
       </div>
 
       <div class="panel">
         <div class="row-between"><h2>Store link</h2></div>
         <div class="link-row">
-          <span class="url">${storeUrl()}</span>
+          <span class="url">${ovEsc(storeUrl())}</span>
           <button class="copy-btn ghost" id="copyStoreLinkSettings">Copy</button>
         </div>
         <div class="form-actions">
@@ -1583,7 +1583,7 @@ nav button.active{background:var(--blue);color:#fff}
 
   function renderLogo(){
     const slot = document.getElementById("logoSlot");
-    slot.innerHTML = settings.logoUrl ? `<img src="${settings.logoUrl}" alt="Logo">` : "+ Logo";
+    slot.innerHTML = settings.logoUrl ? `<img src="${ovEsc(settings.logoUrl)}" alt="Logo">` : "+ Logo";
   }
 
   document.getElementById("logoSlot").onclick = () => document.getElementById("logoInput").click();
