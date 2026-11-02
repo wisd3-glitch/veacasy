@@ -14,7 +14,7 @@ else{$("h").textContent="Forgot your password?";$("s").textContent="Enter your a
 $("rq").onclick=async()=>{const e=$("em").value.trim(),w=$("wa").value.trim();if(!e||!w)return er("Please fill in both fields.");er();$("rq").disabled=true;
 const{error}=await sb.rpc("request_password_reset",{p_email:e,p_whatsapp:w});$("rq").disabled=false;if(error)return er("Something went wrong. Please try again.");
 $("req").style.display="none";$("h").textContent="Request received";$("s").textContent="To protect your account, we confirm it's you on WhatsApp before sending a reset link. Tap below and send the message.";
-$("wal").href="https://wa.me/2347026438309?text="+encodeURIComponent("Hi VEACASY, I forgot my password. My login email is "+e+". Please help me reset it.");show("wd")};
+$("wal").href="https://wa.me/2348056205515?text="+encodeURIComponent("Hi VEACASY, I forgot my password. My login email is "+e+". Please help me reset it.");show("wd")};
 $("tg").onclick=()=>{const s=$("p1").type==="password";$("p1").type=$("p2").type=s?"text":"password";$("tg").textContent=s?"Hide":"Show"};
 $("sv").onclick=async()=>{const a=$("p1").value;if(a.length<8)return er("Use at least 8 characters.");if(a!==$("p2").value)return er("The passwords don't match.");er();$("sv").disabled=true;
 const{error}=await sb.rpc("redeem_reset_token",{p_token:tok,p_password:a});$("sv").disabled=false;if(error)return er(error.message);

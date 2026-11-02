@@ -598,6 +598,49 @@ nav button.active{background:var(--blue);color:#fff}
 @media(prefers-color-scheme:dark){#loginGate .perks span,#loginGate .auth-forgot a,#loginGate .auth-fine a,#loginGate .login-switch button{color:#8fb0ff}}
 @media(min-width:620px){#loginGate .auth-shell{padding-bottom:40px}#loginGate .login-card{flex:none;border-radius:28px;box-shadow:0 24px 60px rgba(3,10,60,.4)}}
 </style>
+<style>
+.panel{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:20px;margin-bottom:14px;box-shadow:none}
+.panel h2,.row-between h2{font-family:var(--font)!important;font-size:19px!important;font-weight:800;letter-spacing:-.01em;color:var(--ink);margin:0}
+.row-between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}
+.header-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.panel label{display:block;font-size:13px;font-weight:600;color:var(--ink);margin:16px 0 7px;text-transform:none;letter-spacing:0}
+.panel label:first-of-type{margin-top:0}
+.panel input[type=text],.panel input[type=number],.panel input[type=tel],.panel input[type=email],.panel textarea,.panel select{width:100%;background:var(--bg);color:var(--ink);border:1.5px solid var(--line)!important;border-radius:14px;padding:14px;font:inherit;font-size:16px;outline:none;box-shadow:none}
+.panel input:focus,.panel textarea:focus,.panel select:focus{border-color:var(--blue)!important;box-shadow:0 0 0 3px rgba(10,47,209,.16)!important}
+.panel textarea{min-height:110px;resize:vertical}
+.panel .category-select{width:auto;padding:10px 12px;font-size:14px;border-radius:12px}
+.photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.ph-item{border-radius:16px;border:1px solid var(--line)}
+.ph-add{border-radius:16px;border:2px dashed #9fb3ff;background:var(--soft);color:var(--blue);font-weight:600}
+.ph-tag,.ph-main{background:var(--blue);color:#fff}
+.ph-note{font-size:12.5px;color:var(--muted);margin:8px 0 0;line-height:1.45}
+.file-drop{border:2px dashed #9fb3ff;background:var(--soft);color:var(--blue);border-radius:16px;padding:16px;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;min-height:68px}
+.color-swatches{display:flex;flex-wrap:wrap;gap:10px}
+.color-swatch{width:38px;height:38px;border-radius:50%;border:3px solid var(--card);box-shadow:0 0 0 1.5px var(--line);cursor:pointer}
+.color-swatch.selected{box-shadow:0 0 0 3px var(--blue)}
+.panel input[type=color]{width:100%;height:48px;padding:4px;border-radius:14px}
+.link-row{display:flex;align-items:center;gap:10px;background:var(--soft);border-radius:14px;padding:10px 10px 10px 14px}
+.link-row .url{flex:1;min-width:0;color:var(--blue);font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.copy-btn,.copy-btn.ghost{background:var(--blue)!important;color:#fff!important;border:0;border-radius:10px;padding:9px 15px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.form-actions{display:flex;gap:10px;margin-top:22px}
+.btn{border-radius:16px;padding:15px;font:inherit;font-weight:700;font-size:16px;border:0;cursor:pointer;flex:1}
+.btn.save{background:var(--blue);color:#fff}
+.btn.cancel{background:var(--soft);color:var(--blue)}
+.btn:disabled{opacity:.6}
+.add-btn{background:var(--blue);color:#fff;border:0;border-radius:12px;padding:11px 15px;font:inherit;font-size:14px;font-weight:700;cursor:pointer}
+.product{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:10px 12px;margin-bottom:10px;gap:12px;border-bottom:1px solid var(--line)}
+.swatch{width:56px;height:56px;border-radius:14px;background:var(--hero);color:#fff;font-family:var(--font);font-weight:800;font-size:19px}
+.p-name{font-size:15px;font-weight:700;margin:0 0 3px;overflow:hidden;text-overflow:ellipsis}
+.p-meta{font-size:13px;color:var(--muted)}
+.toggle.on{background:var(--ok)}
+.icon-btn{width:36px;height:36px;border-radius:11px;color:var(--muted)}
+.icon-btn:hover{background:var(--soft);color:var(--blue)}
+.page-btn{border-radius:10px}.page-btn.active{background:var(--blue);color:#fff;border-color:var(--blue)}
+#settingsTab>.panel:first-child{background:var(--hero);border:0;color:#fff}
+#settingsTab>.panel:first-child h2{color:#fff}
+#settingsTab>.panel:first-child p{color:#cfd9ff!important;margin-top:4px!important}
+@media(prefers-color-scheme:dark){.link-row .url{color:#8fb0ff}.ph-add,.file-drop,.btn.cancel{color:#8fb0ff}}
+</style>
 </head>
 <body>
 
@@ -779,7 +822,7 @@ nav button.active{background:var(--blue);color:#fff}
   }
 
   // ─── PLAN STATUS (trial / expiry) ───────────────────────────────
-  const VEACASY_WHATSAPP = "2347026438309";
+  const VEACASY_WHATSAPP = "2348056205515";
 
   function planIsActive(){
     if (settings.status && settings.status !== "active") return false;
@@ -1481,7 +1524,11 @@ nav button.active{background:var(--blue);color:#fff}
     const since = new Date(Date.now() - ovDays * 864e5).toISOString();
     const { data, error } = await getSupabase().from("events").select("type,product_id,created_at").eq("vendor_id", currentVendorId).gte("created_at", since).limit(10000);
     if (error){
-      el.innerHTML = '<div class="ov-box"><h3>Numbers are not switched on yet</h3><p class="ov-empty">The activity table has not been created. Run setup-events.sql once in Supabase, then refresh this page.</p></div>';
+      const msg = String(error.message || "");
+      const missing = /does not exist|schema cache|relation/i.test(msg);
+      el.innerHTML = '<div class="ov-box"><h3>' + (missing ? "Numbers are not switched on yet" : "Couldn’t load your numbers") + '</h3><p class="ov-empty">' +
+        (missing ? "The activity table was not found. Run setup-events.sql once in Supabase, then refresh this page." : "Please refresh and try again.") +
+        '</p><p class="ov-note">Details: ' + ovEsc(msg || "unknown error") + '</p></div>';
       return;
     }
     const rows = data || [];
