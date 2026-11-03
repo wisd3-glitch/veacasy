@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>About VEACASY</title>
+<meta name="description" content="VEACASY is a simple catalog system for Nigerian sellers, built by Wisdom Kumije of WebCraft NG.">
+<link rel="icon" href="/veacasy-logo.jpeg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/theme.css">
+<style>
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{line-height:1.65;font-size:1.05rem}
+.wrap{max-width:46rem;margin:0 auto;padding:0 1.25rem}
+a{color:var(--blue)}
+@media(prefers-color-scheme:dark){a{color:#8fb0ff}}
+.top{background:var(--card);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;justify-content:space-between;align-items:center;padding-top:.9rem;padding-bottom:.9rem;gap:1rem}
+.brand{display:flex;align-items:center;gap:.6rem;text-decoration:none;color:var(--ink);font-weight:700;font-size:1.15rem}
+.brand img{width:2rem;height:2rem;border-radius:8px;object-fit:cover}
+.back{font-weight:500;font-size:.95rem;text-decoration:none}
+.hero{background:var(--hero);color:#fff;padding:3rem 0 3.25rem}
+.hero h1{font-size:clamp(1.8rem,6vw,2.9rem);line-height:1.12;margin:0 0 1rem;font-weight:700;letter-spacing:-.01em}
+.hero p{margin:0;font-size:1.1rem;opacity:.92;max-width:38rem}
+section{padding:2rem 0 .5rem}
+h2{font-size:1.4rem;line-height:1.25;margin:0 0 .8rem;font-weight:700}
+p{margin:0 0 1rem}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:1.15rem 1.25rem}
+.person{display:flex;gap:1rem;align-items:center;margin:1.1rem 0}
+.avatar{flex:none;width:3.5rem;height:3.5rem;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;font-weight:700;font-size:1.15rem}
+.person strong{display:block;font-size:1.08rem}
+.person span{color:var(--mute);font-size:.95rem}
+.pair{display:grid;gap:1rem;grid-template-columns:1fr}
+@media(min-width:36rem){.pair{grid-template-columns:1fr 1fr}}
+.card h3{font-size:1.02rem;margin:0 0 .5rem}
+.card ul{margin:0;padding-left:1.1rem;color:var(--mute)}
+.card li{margin-bottom:.35rem}
+.ok{border-top:4px solid var(--ok)}
+.no{border-top:4px solid var(--danger)}
+ol.steps{margin:0 0 1rem;padding-left:1.25rem}
+ol.steps li{margin-bottom:.5rem}
+.cta{display:inline-block;background:var(--blue);color:#fff;font-weight:700;text-decoration:none;padding:.85rem 1.4rem;border-radius:12px}
+.cta:hover{background:var(--blue2)}
+.links{display:flex;flex-wrap:wrap;gap:.6rem 1.5rem;margin-top:1.1rem;font-weight:500}
+footer{margin-top:2.5rem;padding:1.5rem 0 2rem;border-top:1px solid var(--line);color:var(--mute);font-size:.92rem}
+footer a{color:var(--mute)}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/veacasy-logo.jpeg" alt="">VEACASY</a>
+    <a class="back" href="/">Back to home</a>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="wrap">
+    <h1>A simpler way for Nigerian sellers to show their products and get orders.</h1>
+    <p>VEACASY is a catalog system for small businesses that sell on WhatsApp and Instagram. You put your products online, share one link, and customers send you their order on WhatsApp.</p>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <section>
+    <h2>Who is behind VEACASY</h2>
+    <p>VEACASY was created by Wisdom Kumije, a web developer and graphic designer based in Nigeria. It is built and run under WebCraft NG, a web development and brand design business.</p>
+    <div class="card person">
+      <div class="avatar" aria-hidden="true">WK</div>
+      <div>
+        <strong>Wisdom Kumije</strong>
+        <span>Founder, VEACASY. Web developer and graphic designer, WebCraft NG.</span>
+      </div>
+    </div>
+    <p>WebCraft NG also builds custom e-commerce websites with full checkout for businesses that have outgrown a simple catalog.</p>
+  </section>
+
+  <section>
+    <h2>Why we built it</h2>
+    <p>Many sellers send product photos and prices one customer at a time. It takes hours, and orders get lost in long chats. VEACASY replaces that with one clean link that shows everything you sell and sends you the order in a single message.</p>
+    <p>It is simple on purpose. No website knowledge is needed, and you can run your store from your phone.</p>
+  </section>
+
+  <section>
+    <h2>What we do and what we don’t</h2>
+    <div class="pair">
+      <div class="card ok">
+        <h3>What VEACASY does</h3>
+        <ul>
+          <li>Hosts your product catalog</li>
+          <li>Gives you your own store link</li>
+          <li>Sends customer orders to your WhatsApp</li>
+          <li>Shows you visits and product clicks</li>
+        </ul>
+      </div>
+      <div class="card no">
+        <h3>What VEACASY does not do</h3>
+        <ul>
+          <li>Take payments from your customers</li>
+          <li>Hold your sales money</li>
+          <li>Process or deliver your orders</li>
+          <li>Ask for your customers’ card details</li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin-top:1rem">Your customers pay you directly, the way you already collect payment. VEACASY never stands between you and your money.</p>
+  </section>
+
+  <section>
+    <h2>How paying for a plan works</h2>
+    <p>The 14-day free trial needs no card and no payment. When you are ready to upgrade:</p>
+    <ol class="steps">
+      <li>Choose a plan and message us on WhatsApp.</li>
+      <li>We send you the payment details.</li>
+      <li>Once your payment is confirmed, we send you an upgrade code.</li>
+      <li>Enter the code in your dashboard and your plan unlocks.</li>
+    </ol>
+    <p>Only pay to account details sent to you from our official WhatsApp number below.</p>
+  </section>
+
+  <section>
+    <h2>Talk to us</h2>
+    <p>Have a question before you sign up, or need help setting up your store? Message us on WhatsApp.</p>
+    <a class="cta" href="https://wa.me/2348056205515?text=Hi%20VEACASY%2C%20I%20have%20a%20question.">Message us on WhatsApp</a>
+    <div class="links">
+      <a href="/signup">Start free trial</a>
+      <a href="https://webcraftng.vercel.app" rel="noopener">Visit WebCraft NG</a>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    © 2026 VEACASY, a product of WebCraft NG. <a href="/terms">Terms</a> · <a href="/privacy">Privacy</a>
+  </div>
+</footer>
+
+</body>
+</html>
